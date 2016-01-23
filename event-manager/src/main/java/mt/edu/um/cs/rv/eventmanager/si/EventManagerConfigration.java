@@ -3,18 +3,14 @@ package mt.edu.um.cs.rv.eventmanager.si;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.aggregator.AggregatingMessageHandler;
 import org.springframework.integration.aggregator.DefaultAggregatingMessageGroupProcessor;
 import org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.channel.AbstractSubscribableChannel;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.NullChannel;
-import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.core.MessagingTemplate;
-import org.springframework.integration.handler.ServiceActivatingHandler;
 import org.springframework.integration.scattergather.ScatterGatherHandler;
 import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.MessageHandler;
@@ -84,6 +80,12 @@ public class EventManagerConfigration {
                 new SimpleMessageStore(),
                 new HeaderAttributeCorrelationStrategy(IntegrationMessageHeaderAccessor.CORRELATION_ID),
                 new AfterAllMessagesInGroupReleaseStrategy());
+    }
+
+    //////////////////////// MONITOR REGISTRY ////////////////////////
+    @Bean
+    public MonitorRegistry monitorRegistry(){
+         return new MonitorRegistry();
     }
 
 }

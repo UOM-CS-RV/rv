@@ -1,9 +1,11 @@
 package mt.edu.um.cs.rv.sample.controller;
 
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
+import mt.edu.um.cs.rv.eventmanager.si.MonitorRegistry;
 import mt.edu.um.cs.rv.events.LoginEvent;
 import mt.edu.um.cs.rv.events.LogoutEvent;
 import mt.edu.um.cs.rv.events.UserCreatedEvent;
+import mt.edu.um.cs.rv.monitors.GlobalUserLogoutCounterMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,11 @@ public class HelloWorldController {
     private static final Logger LOGGER = LoggerFactory.getLogger(HelloWorldController.class);
     @Autowired
     DirectInvocationEventObserver directInvocationEventAdaptor;
+
+
+    @Autowired
+    MonitorRegistry monitorRegistry;
+
 
     private Boolean synchronous = Boolean.TRUE;
 
@@ -74,5 +81,17 @@ public class HelloWorldController {
         this.synchronous = Boolean.FALSE;
         return synchronous;
     }
+
+    @RequestMapping(value="/system/logoutMonitor", method = RequestMethod.POST)
+    public Boolean registerGlobalUserLogoutCounterMonitor(){
+
+        GlobalUserLogoutCounterMonitor globalUserLogoutCounterMonitor = new GlobalUserLogoutCounterMonitor();
+
+        monitorRegistry.registerNewMonitor(globalUserLogoutCounterMonitor);
+
+        return Boolean.TRUE;
+    }
+
+
 
 }

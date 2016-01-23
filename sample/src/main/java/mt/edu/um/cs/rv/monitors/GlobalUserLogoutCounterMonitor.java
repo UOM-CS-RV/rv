@@ -17,20 +17,17 @@ public class GlobalUserLogoutCounterMonitor implements Monitor {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GlobalUserLogoutCounterMonitor.class);
 
-    private String name;
     private Set<Class<? extends Event>> requiredEvents;
     private AtomicLong logoutCount = new AtomicLong();
 
-    public GlobalUserLogoutCounterMonitor(String name) {
-        this.name = name;
-
+    public GlobalUserLogoutCounterMonitor() {
         requiredEvents = new HashSet();
         requiredEvents.add(LogoutEvent.class);
     }
 
     @Override
     public String getName() {
-        return name;
+        return "GlobalUserLogoutCounterMonitor";
     }
 
     @Override

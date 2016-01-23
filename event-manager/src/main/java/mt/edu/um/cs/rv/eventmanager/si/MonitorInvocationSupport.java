@@ -1,6 +1,7 @@
-package mt.edu.um.cs.rv.monitors;
+package mt.edu.um.cs.rv.eventmanager.si;
 
 import mt.edu.um.cs.rv.events.Event;
+import mt.edu.um.cs.rv.monitors.Monitor;
 
 /**
  * Created by dwardu on 19/01/2016.
