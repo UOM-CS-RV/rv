@@ -1,6 +1,6 @@
 package mt.edu.um.cs.rv.monitors;
 
-import mt.edu.um.cs.rv.eventmanager.events.Event;
+import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.LoginEvent;
 import mt.edu.um.cs.rv.events.LogoutEvent;
 import mt.edu.um.cs.rv.events.UserEvent;

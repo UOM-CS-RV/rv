@@ -1,7 +1,6 @@
 package mt.edu.um.cs.rv.monitors;
 
-import mt.edu.um.cs.rv.eventmanager.events.Event;
-import org.springframework.integration.core.GenericSelector;
+import mt.edu.um.cs.rv.events.Event;
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.messaging.Message;
 

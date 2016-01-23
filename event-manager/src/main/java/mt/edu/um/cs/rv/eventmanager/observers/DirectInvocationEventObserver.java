@@ -1,6 +1,6 @@
 package mt.edu.um.cs.rv.eventmanager.observers;
 
-import mt.edu.um.cs.rv.eventmanager.events.Event;
+import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.eventmanager.si.EventMessageSender;
 
 /**

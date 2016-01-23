@@ -1,13 +1,11 @@
 package mt.edu.um.cs.rv.eventmanager.si;
 
-import mt.edu.um.cs.rv.eventmanager.events.Event;
+import mt.edu.um.cs.rv.events.Event;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.NullChannel;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
-
-import java.util.concurrent.Executor;
 
 /**
  * Created by dwardu on 19/01/2016.

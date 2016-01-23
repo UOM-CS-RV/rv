@@ -17,6 +17,8 @@
     <modules>
         <module>event-manager</module>
         <module>sample</module>
+        <module>monitors</module>
+        <module>events</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -25,6 +27,21 @@
             <dependency>
                 <groupId>mt.edu.um.cs.rv</groupId>
                 <artifactId>event-manager</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mt.edu.um.cs.rv</groupId>
+                <artifactId>events</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mt.edu.um.cs.rv</groupId>
+                <artifactId>monitors</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mt.edu.um.cs.rv</groupId>
+                <artifactId>sample</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
