@@ -26,6 +26,8 @@ public class CustomRecipientListRouter extends RecipientListRouter {
     }
 
 
+    //TODO override determineTargetChannels() to make channel lookup more efficient
+
     private ConcurrentLinkedQueue<Recipient> fetchRecipientList() {
         Field recipientsFields = ReflectionUtils.findField(RecipientListRouter.class, "recipients");
         recipientsFields.setAccessible(true);
