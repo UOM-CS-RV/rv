@@ -1,6 +1,7 @@
-package mt.edu.um.cs.rv.eventmanager.si;
+package mt.edu.um.cs.rv.eventmanager.adaptors;
 
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
+import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

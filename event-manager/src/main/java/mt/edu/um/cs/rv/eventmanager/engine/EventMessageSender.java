@@ -1,4 +1,4 @@
-package mt.edu.um.cs.rv.eventmanager.si;
+package mt.edu.um.cs.rv.eventmanager.engine;
 
 import mt.edu.um.cs.rv.events.Event;
 import org.springframework.integration.channel.ExecutorChannel;

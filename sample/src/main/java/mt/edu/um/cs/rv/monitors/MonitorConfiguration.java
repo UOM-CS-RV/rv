@@ -1,11 +1,9 @@
 package mt.edu.um.cs.rv.monitors;
 
-import mt.edu.um.cs.rv.eventmanager.si.MonitorEventSelector;
-import mt.edu.um.cs.rv.eventmanager.si.MonitorRegistry;
+import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.channel.ExecutorChannel;
 
 import java.util.Arrays;
 import java.util.List;

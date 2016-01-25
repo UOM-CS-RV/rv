@@ -1,4 +1,4 @@
-package mt.edu.um.cs.rv.eventmanager.si;
+package mt.edu.um.cs.rv.eventmanager.engine;
 
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.router.RecipientListRouter;

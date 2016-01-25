@@ -1,7 +1,7 @@
 package mt.edu.um.cs.rv.sample.controller;
 
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
-import mt.edu.um.cs.rv.eventmanager.si.MonitorRegistry;
+import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import mt.edu.um.cs.rv.events.LoginEvent;
 import mt.edu.um.cs.rv.events.LogoutEvent;
 import mt.edu.um.cs.rv.events.UserCreatedEvent;

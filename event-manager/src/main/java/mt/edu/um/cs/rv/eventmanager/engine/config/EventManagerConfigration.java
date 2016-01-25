@@ -1,5 +1,10 @@
-package mt.edu.um.cs.rv.eventmanager.si;
+package mt.edu.um.cs.rv.eventmanager.engine.config;
 
+import mt.edu.um.cs.rv.eventmanager.engine.AfterAllMessagesInGroupReleaseStrategy;
+import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
+import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
+import mt.edu.um.cs.rv.eventmanager.adaptors.EventAdaptorConfiguration;
+import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

@@ -1,6 +1,6 @@
 package mt.edu.um.cs.rv.sample;
 
-import mt.edu.um.cs.rv.eventmanager.si.EventManagerConfigration;
+import mt.edu.um.cs.rv.eventmanager.engine.config.EventManagerConfigration;
 import mt.edu.um.cs.rv.monitors.MonitorConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

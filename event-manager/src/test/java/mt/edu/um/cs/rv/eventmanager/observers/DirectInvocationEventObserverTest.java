@@ -1,6 +1,6 @@
 package mt.edu.um.cs.rv.eventmanager.observers;
 
-import mt.edu.um.cs.rv.eventmanager.si.EventMessageSender;
+import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.events.Event;
 import org.junit.Before;
 import org.junit.Test;
