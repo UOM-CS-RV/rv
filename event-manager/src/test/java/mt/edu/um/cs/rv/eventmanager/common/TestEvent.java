@@ -1,4 +1,4 @@
-package mt.edu.um.cs.rv.eventmanager.observers;
+package mt.edu.um.cs.rv.eventmanager.common;
 
 import mt.edu.um.cs.rv.events.Event;
 
@@ -8,9 +8,15 @@ import mt.edu.um.cs.rv.events.Event;
 public class TestEvent implements Event{
 
     private final String message = "Hello, world";
+    private boolean sync;
+
+    public TestEvent(boolean sync) {
+        this.sync= sync;
+    }
+
     @Override
     public boolean isSynchronous() {
-        return true;
+        return sync;
     }
 
     @Override
