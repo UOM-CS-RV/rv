@@ -17,10 +17,15 @@ public class AfterAllMessagesInGroupReleaseStrategy implements ReleaseStrategy {
 
     @Override
     public boolean canRelease(MessageGroup group) {
+        if (group == null){
+            throw new IllegalArgumentException("MessageGroup should not be null");
+        }
+
         Collection<Message<?>> messages = group.getMessages();
 
+
         if ((messages == null) || (!messages.iterator().hasNext())) {
-            return false;
+            return true;
         } else {
             Integer sequenceSize = group.getSequenceSize();
             Integer messagesSeen = group.getMessages().size();
