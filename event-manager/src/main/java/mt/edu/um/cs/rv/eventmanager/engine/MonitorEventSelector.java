@@ -18,8 +18,14 @@ public class MonitorEventSelector implements MessageSelector {
 
     @Override
     public boolean accept(Message<?> message) {
-        Event payload = (Event) message.getPayload();
+        Object payloadObject = message.getPayload();
+        if (Event.class.isInstance(payloadObject)) {
 
-        return monitor.requiredEvents().contains(payload.getClass());
+            Event payload = (Event) message.getPayload();
+            return monitor.requiredEvents().contains(payload.getClass());
+
+        } else {
+            return false;
+        }
     }
 }
