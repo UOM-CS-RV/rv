@@ -19,10 +19,10 @@ import java.util.UUID;
 public class MonitorRegistry {
 
     @Autowired
-    CustomRecipientListRouter recipientListRouter;
+    protected CustomRecipientListRouter recipientListRouter;
 
     @Autowired
-    ConfigurableApplicationContext configurableApplicationContext;
+    protected ConfigurableApplicationContext configurableApplicationContext;
 
     public ServiceActivatingHandler registerNewMonitor(Monitor monitor){
         String channelName = monitor + "-" + UUID.randomUUID().toString();
@@ -34,9 +34,6 @@ public class MonitorRegistry {
         return registerNewMonitor(monitor, directInputChannel, selector);
     }
 
-    //////////////////////// New Monitor Registration ////////////////////////
-//    @Bean
-//    @Scope("prototype")
     public ServiceActivatingHandler registerNewMonitor(
             Monitor monitor,
             AbstractSubscribableChannel inputMessageChannel,
@@ -49,10 +46,7 @@ public class MonitorRegistry {
 
         inputMessageChannel.subscribe(serviceActivatingHandler);
 
-//        recipientListRouter.addRecipient(inputMessageChannel.getComponentName());
-        //TODO - either enable the message selector string or enable adding a  RecipientListRouter.Recipient
         recipientListRouter.addRecipient(inputMessageChannel, messageSelector);
-
 
         String serviceActivatorName = monitor.getName() + "-" + inputMessageChannel.getComponentName() + UUID.randomUUID().toString();
         configurableApplicationContext.getBeanFactory().registerSingleton(serviceActivatorName, serviceActivatingHandler);
@@ -71,4 +65,19 @@ public class MonitorRegistry {
         return directChannel;
     }
 
+    public CustomRecipientListRouter getRecipientListRouter() {
+        return recipientListRouter;
+    }
+
+    public void setRecipientListRouter(CustomRecipientListRouter recipientListRouter) {
+        this.recipientListRouter = recipientListRouter;
+    }
+
+    public ConfigurableApplicationContext getConfigurableApplicationContext() {
+        return configurableApplicationContext;
+    }
+
+    public void setConfigurableApplicationContext(ConfigurableApplicationContext configurableApplicationContext) {
+        this.configurableApplicationContext = configurableApplicationContext;
+    }
 }
