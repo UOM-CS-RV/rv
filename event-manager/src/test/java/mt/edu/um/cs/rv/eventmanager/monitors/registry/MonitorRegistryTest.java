@@ -41,7 +41,6 @@ public class MonitorRegistryTest {
         monitorRegistry = new MonitorRegistry();
         monitorRegistry.setRecipientListRouter(recipientListRouter);
         monitorRegistry.setConfigurableApplicationContext(configurableApplicationContext);
-        monitorRegistry.setExecutor(executor);
     }
 
     @Test

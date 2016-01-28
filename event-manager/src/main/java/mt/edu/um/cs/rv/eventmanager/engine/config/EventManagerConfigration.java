@@ -1,10 +1,11 @@
 package mt.edu.um.cs.rv.eventmanager.engine.config;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import mt.edu.um.cs.rv.eventmanager.adaptors.EventAdaptorConfiguration;
 import mt.edu.um.cs.rv.eventmanager.engine.AfterAllMessagesInGroupReleaseStrategy;
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
-import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
-import mt.edu.um.cs.rv.eventmanager.adaptors.EventAdaptorConfiguration;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
+import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -22,6 +23,9 @@ import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.MessageHandler;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by dwardu on 18/01/2016.
@@ -51,8 +55,13 @@ public class EventManagerConfigration {
     }
 
     @Bean
-    ExecutorChannel eventMessageRequestChannel(Executor executor) {
-        return new ExecutorChannel(executor);
+    ExecutorChannel eventMessageRequestChannel() {
+        ThreadFactory channelThread = new ThreadFactoryBuilder()
+                .setNameFormat("EventMessageRequestChannel")
+                .setDaemon(true)
+                .build();
+        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor(channelThread);
+        return new ExecutorChannel(singleThreadExecutor);
     }
 
     @Bean
@@ -74,7 +83,7 @@ public class EventManagerConfigration {
 
     @Bean
     public EventMessageSender eventMessageSender(Executor executor) {
-        return new EventMessageSender(inputMessagingTemplate(), eventMessageRequestChannel(executor), noop());
+        return new EventMessageSender(inputMessagingTemplate(), eventMessageRequestChannel(), noop());
     }
 
 
@@ -91,8 +100,8 @@ public class EventManagerConfigration {
 
     //////////////////////// MONITOR REGISTRY ////////////////////////
     @Bean
-    public MonitorRegistry monitorRegistry(){
-         return new MonitorRegistry();
+    public MonitorRegistry monitorRegistry() {
+        return new MonitorRegistry();
     }
 
 }

@@ -1,10 +1,9 @@
 package mt.edu.um.cs.rv.eventmanager.adaptors;
 
-import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
+import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.config.EnableIntegration;
 
 /**
  * Created by dwardu on 19/01/2016.
@@ -13,7 +12,7 @@ import org.springframework.integration.config.EnableIntegration;
 public class EventAdaptorConfiguration {
 
     @Bean
-    public DirectInvocationEventObserver directInvocationEventAdaptor(EventMessageSender eventMessageSender){
+    public DirectInvocationEventObserver directInvocationEventAdaptor(EventMessageSender eventMessageSender) {
         return new DirectInvocationEventObserver(eventMessageSender);
     }
 

@@ -1,6 +1,7 @@
 package mt.edu.um.cs.rv.eventmanager.integration.monitors;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.Monitor;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class RememberingMonitor implements Monitor {
     private Class<? extends Event>[] requiredEvents;
 
     protected Set<Event> allEvents = new HashSet<>();
+    protected List<Event> allOrderedEvents = new ArrayList<>();
 
     public RememberingMonitor(String name, Class<? extends Event>[] requiredEvents) {
         this.name = name;
@@ -39,9 +41,19 @@ public class RememberingMonitor implements Monitor {
     public void handleEvent(Event e) {
         LOGGER.info("{}[{}] handling event [{}]", this.getClass().getSimpleName(), getName(), e);
         this.allEvents.add(e);
+        this.allOrderedEvents.add(e);
     }
 
-    public List<Event> getAllEvents(){
-        return ImmutableList.copyOf(allEvents);
+    public Set<Event> getAllEvents() {
+        return ImmutableSet.copyOf(allEvents);
+    }
+
+    public List<Event> getAllOrderedEvents() {
+        return ImmutableList.copyOf(allOrderedEvents);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

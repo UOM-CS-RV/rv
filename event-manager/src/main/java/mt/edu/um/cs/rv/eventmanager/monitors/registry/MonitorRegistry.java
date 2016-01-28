@@ -1,5 +1,6 @@
 package mt.edu.um.cs.rv.eventmanager.monitors.registry;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.MonitorEventSelector;
 import mt.edu.um.cs.rv.eventmanager.monitors.MonitorInvocationSupport;
@@ -7,13 +8,15 @@ import mt.edu.um.cs.rv.monitors.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.handler.ServiceActivatingHandler;
 
 import java.util.UUID;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by dwardu on 23/01/2016.
@@ -26,13 +29,16 @@ public class MonitorRegistry {
     @Autowired
     protected ConfigurableApplicationContext configurableApplicationContext;
 
-    @Autowired
-    Executor executor;
-
-    public ServiceActivatingHandler registerNewMonitor(Monitor monitor){
+    public ServiceActivatingHandler registerNewMonitor(Monitor monitor) {
         String channelName = monitor + "-" + UUID.randomUUID().toString();
 
-        AbstractSubscribableChannel subscribableChannel = createChannel(channelName);
+        ThreadFactory channelThread = new ThreadFactoryBuilder()
+                .setNameFormat(monitor + "-%d")
+                .setDaemon(true)
+                .build();
+        ExecutorService executor = Executors.newSingleThreadExecutor(channelThread);
+
+        AbstractSubscribableChannel subscribableChannel = createChannel(channelName, executor);
 
         MonitorEventSelector selector = new MonitorEventSelector(monitor);
 
@@ -59,7 +65,7 @@ public class MonitorRegistry {
         return serviceActivatingHandler;
     }
 
-    private AbstractSubscribableChannel createChannel(String inputChannelName) {
+    private AbstractSubscribableChannel createChannel(String inputChannelName, Executor executor) {
         ExecutorChannel subscribableChannel = new ExecutorChannel(executor);
 
         subscribableChannel.setBeanName(inputChannelName);
@@ -86,11 +92,5 @@ public class MonitorRegistry {
         this.configurableApplicationContext = configurableApplicationContext;
     }
 
-    public Executor getExecutor() {
-        return executor;
-    }
 
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
-    }
 }
