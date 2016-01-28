@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.handler.ServiceActivatingHandler;
 
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 /**
  * Created by dwardu on 23/01/2016.
@@ -24,14 +26,17 @@ public class MonitorRegistry {
     @Autowired
     protected ConfigurableApplicationContext configurableApplicationContext;
 
+    @Autowired
+    Executor executor;
+
     public ServiceActivatingHandler registerNewMonitor(Monitor monitor){
         String channelName = monitor + "-" + UUID.randomUUID().toString();
 
-        DirectChannel directInputChannel = createDirectInputChannel(channelName);
+        AbstractSubscribableChannel subscribableChannel = createChannel(channelName);
 
         MonitorEventSelector selector = new MonitorEventSelector(monitor);
 
-        return registerNewMonitor(monitor, directInputChannel, selector);
+        return registerNewMonitor(monitor, subscribableChannel, selector);
     }
 
     public ServiceActivatingHandler registerNewMonitor(
@@ -54,15 +59,15 @@ public class MonitorRegistry {
         return serviceActivatingHandler;
     }
 
-    private DirectChannel createDirectInputChannel(String inputChannelName) {
-        DirectChannel directChannel = new DirectChannel();
+    private AbstractSubscribableChannel createChannel(String inputChannelName) {
+        ExecutorChannel subscribableChannel = new ExecutorChannel(executor);
 
-        directChannel.setBeanName(inputChannelName);
-        directChannel.setBeanFactory(configurableApplicationContext);
+        subscribableChannel.setBeanName(inputChannelName);
+        subscribableChannel.setBeanFactory(configurableApplicationContext);
 
-        configurableApplicationContext.getBeanFactory().registerSingleton(inputChannelName, directChannel);
+        configurableApplicationContext.getBeanFactory().registerSingleton(inputChannelName, subscribableChannel);
 
-        return directChannel;
+        return subscribableChannel;
     }
 
     public CustomRecipientListRouter getRecipientListRouter() {
@@ -79,5 +84,13 @@ public class MonitorRegistry {
 
     public void setConfigurableApplicationContext(ConfigurableApplicationContext configurableApplicationContext) {
         this.configurableApplicationContext = configurableApplicationContext;
+    }
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
     }
 }

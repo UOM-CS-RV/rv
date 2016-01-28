@@ -8,8 +8,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
+import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.messaging.MessageChannel;
+
+import java.util.concurrent.Executor;
 
 import static org.mockito.Mockito.*;
 
@@ -33,10 +36,12 @@ public class MonitorRegistryTest {
         configurableApplicationContext = mock(ConfigurableApplicationContext.class);
         beanFactory = mock(ConfigurableListableBeanFactory.class);
         when(configurableApplicationContext.getBeanFactory()).thenReturn(beanFactory);
+        Executor executor = mock(Executor.class);
 
         monitorRegistry = new MonitorRegistry();
         monitorRegistry.setRecipientListRouter(recipientListRouter);
         monitorRegistry.setConfigurableApplicationContext(configurableApplicationContext);
+        monitorRegistry.setExecutor(executor);
     }
 
     @Test
