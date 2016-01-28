@@ -15,6 +15,7 @@ import org.springframework.integration.aggregator.HeaderAttributeCorrelationStra
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.NullChannel;
+import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.scattergather.ScatterGatherHandler;
 import org.springframework.integration.store.SimpleMessageStore;
@@ -26,6 +27,7 @@ import java.util.concurrent.Executor;
  * Created by dwardu on 18/01/2016.
  */
 @Configuration
+@EnableIntegration
 @Import({EventAdaptorConfiguration.class})
 public class EventManagerConfigration {
 
