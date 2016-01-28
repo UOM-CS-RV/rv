@@ -19,7 +19,6 @@
         <module>sample</module>
         <module>monitors</module>
         <module>events</module>
-        <module>performance-tests</module>
     </modules>
     <packaging>pom</packaging>
 
