@@ -146,7 +146,7 @@ public class ScatterGatherIntegrationTest {
         eventMessageSender.send(eventA);
 
         //wait a bit to ensure the events have been processed by R1 and R2
-        Thread.sleep(10);
+        Thread.sleep(100);
         //assert that events have been processed by R1 and R2
         Assert.assertEquals(1, rememberingMonitor1.getAllEvents().size());
         Assert.assertEquals(1, rememberingMonitor2.getAllEvents().size());
@@ -154,7 +154,7 @@ public class ScatterGatherIntegrationTest {
         //release semaphore
         semaphore.release();
         //wait a bit for BR1 to process event
-        Thread.sleep(10);
+        Thread.sleep(100);
         //ensure BR1 has process event
         Assert.assertEquals(1, blockingAndRememberingMonitor.getAllEvents().size());
 
