@@ -82,7 +82,7 @@ public class EventManagerConfigration {
     }
 
     @Bean
-    public EventMessageSender eventMessageSender(Executor executor) {
+    public EventMessageSender eventMessageSender() {
         return new EventMessageSender(inputMessagingTemplate(), eventMessageRequestChannel(), noop());
     }
 
