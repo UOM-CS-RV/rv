@@ -1,11 +1,16 @@
 package mt.edu.um.cs.rv.eventmanager.engine;
 
-import org.springframework.integration.core.MessageSelector;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import mt.edu.um.cs.rv.events.Event;
 import org.springframework.integration.router.RecipientListRouter;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -13,20 +18,38 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class CustomRecipientListRouter extends RecipientListRouter {
 
+    private boolean useLookupMap = false;
+
     private ConcurrentLinkedQueue<Recipient> recipientList = null;
+
+    private Multimap eventToMessageChannelMap = ArrayListMultimap.create();
 
     public CustomRecipientListRouter() {
         super();
         recipientList = fetchRecipientList();
     }
 
+    public void addRecipient(MessageChannel channel, MonitorEventSelector selector) {
 
-    public void addRecipient(MessageChannel channel, MessageSelector messageSelector) {
-        this.recipientList.add(new Recipient(channel, messageSelector));
+        if (useLookupMap) {
+            Set<Class<? extends Event>> classes = selector.getMonitor().requiredEvents();
+            for (Class c : classes) {
+                eventToMessageChannelMap.put(c, channel);
+            }
+        } else {
+            this.recipientList.add(new Recipient(channel, selector));
+        }
     }
 
-
-    //TODO override determineTargetChannels() to make channel lookup more efficient
+    @Override
+    protected Collection<MessageChannel> determineTargetChannels(Message<?> message) {
+        if (useLookupMap) {
+            Class<?> payloadClass = message.getPayload().getClass();
+            return eventToMessageChannelMap.get(payloadClass);
+        } else {
+            return super.determineTargetChannels(message);
+        }
+    }
 
     private ConcurrentLinkedQueue<Recipient> fetchRecipientList() {
         Field recipientsFields = ReflectionUtils.findField(RecipientListRouter.class, "recipients");
@@ -35,4 +58,12 @@ public class CustomRecipientListRouter extends RecipientListRouter {
         return field;
     }
 
+
+    public boolean isUseLookupMap() {
+        return useLookupMap;
+    }
+
+    public void setUseLookupMap(boolean useLookupMap) {
+        this.useLookupMap = useLookupMap;
+    }
 }

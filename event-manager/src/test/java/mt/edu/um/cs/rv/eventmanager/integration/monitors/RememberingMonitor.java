@@ -39,7 +39,7 @@ public class RememberingMonitor implements Monitor {
 
     @Override
     public void handleEvent(Event e) {
-        LOGGER.info("{}[{}] handling event [{}]", this.getClass().getSimpleName(), getName(), e);
+        LOGGER.debug("{}[{}] handling event [{}]", this.getClass().getSimpleName(), getName(), e);
         this.allEvents.add(e);
         this.allOrderedEvents.add(e);
     }

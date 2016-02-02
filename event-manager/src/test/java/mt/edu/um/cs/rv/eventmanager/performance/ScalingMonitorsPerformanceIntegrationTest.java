@@ -3,33 +3,26 @@ package mt.edu.um.cs.rv.eventmanager.performance;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
+import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.config.EventManagerConfigration;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventA;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventB;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventC;
-import mt.edu.um.cs.rv.eventmanager.integration.monitors.ReleasingAndRememberingMonitor;
+import mt.edu.um.cs.rv.eventmanager.integration.monitors.ReleasingMonitor;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
-import mt.edu.um.cs.rv.events.Event;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +41,9 @@ public class ScalingMonitorsPerformanceIntegrationTest {
     MonitorRegistry monitorRegistry;
 
     @Autowired
+    CustomRecipientListRouter customRecipientListRouter;
+
+    @Autowired
     DirectInvocationEventObserver directInvocationEventObserver;
 
     @Rule
@@ -58,7 +54,7 @@ public class ScalingMonitorsPerformanceIntegrationTest {
 
     private Semaphore semaphore;
     private int numberOfMonitors;
-    private int numberOfEventsForEachType = 100;
+    private int numberOfEventsForEachType = 30;
 
     @Before
     public void setup() throws Exception {
@@ -76,49 +72,90 @@ public class ScalingMonitorsPerformanceIntegrationTest {
                         * 3;
 
 
-        semaphore = new Semaphore(1-numberOfTotalEventsToBeProcessed);
-        for (int i = 0; i < numberOfMonitors; i++){
-            ReleasingAndRememberingMonitor newMonitor = createNewMonitor(i + 1);
+        if (methodName.endsWith("WithLookupMap")) {
+            customRecipientListRouter.setUseLookupMap(true);
+        }
+
+        semaphore = new Semaphore(1 - numberOfTotalEventsToBeProcessed);
+        for (int i = 0; i < numberOfMonitors; i++) {
+            ReleasingMonitor newMonitor = createNewMonitor(i + 1);
             newMonitor.setSemaphore(semaphore);
             monitorRegistry.registerNewMonitor(newMonitor);
         }
     }
 
 
-    private ReleasingAndRememberingMonitor createNewMonitor(int id){
-        String monitorName = "RR" + String.format("%05d",id);
+    private ReleasingMonitor createNewMonitor(int id) {
+        String monitorName = "RR" + String.format("%05d", id);
         Class[] events = {EventA.class, EventB.class, EventC.class};
-        ReleasingAndRememberingMonitor releasingAndRememberingMonitor = new ReleasingAndRememberingMonitor(monitorName, events);
-        return releasingAndRememberingMonitor;
+        ReleasingMonitor releasingMonitor = new ReleasingMonitor(monitorName, events);
+        return releasingMonitor;
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test10Monitors() throws InterruptedException {
+    public void test050Monitors() throws InterruptedException {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test20Monitors() throws InterruptedException {
+    public void test050MonitorsWithLookupMap() throws InterruptedException {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test30Monitors() throws InterruptedException {
+    public void test100Monitors() throws InterruptedException {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test40Monitors() throws InterruptedException {
+    public void test100MonitorsWithLookupMap() throws InterruptedException {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test150Monitors() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test150MonitorsWithLookupMap() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test200Monitors() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test200MonitorsWithLookupMap() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test300Monitors() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test300MonitorsWithLookupMap() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
 
     private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException {
 
-        for (int i = 0; i < numberOfEventsForEachType; i++){
+        for (int i = 0; i < numberOfEventsForEachType; i++) {
             //send A event
             EventA eventA = new EventA(false, i);
             directInvocationEventObserver.observeEvent(eventA);

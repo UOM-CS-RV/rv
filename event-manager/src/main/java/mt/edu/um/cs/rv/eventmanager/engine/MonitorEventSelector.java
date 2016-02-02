@@ -28,4 +28,8 @@ public class MonitorEventSelector implements MessageSelector {
             return false;
         }
     }
+
+    public Monitor getMonitor() {
+        return monitor;
+    }
 }

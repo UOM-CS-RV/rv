@@ -24,7 +24,7 @@ public class CustomRecipientListRouterTest {
     public void testAddRecipient() {
 
         MessageChannel messageChannel = mock(MessageChannel.class);
-        MessageSelector messageSelector = mock(MessageSelector.class);
+        MonitorEventSelector messageSelector = mock(MonitorEventSelector.class);
 
         router.addRecipient(messageChannel, messageSelector);
 

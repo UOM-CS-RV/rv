@@ -22,7 +22,6 @@ import org.springframework.integration.scattergather.ScatterGatherHandler;
 import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.MessageHandler;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -69,7 +68,6 @@ public class EventManagerConfigration {
         return recipientListRouter();
     }
 
-    @Bean
     public CustomRecipientListRouter recipientListRouter() {
         CustomRecipientListRouter router = new CustomRecipientListRouter();
         router.setApplySequence(true);

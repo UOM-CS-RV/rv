@@ -26,7 +26,7 @@ public class ReleasingAndRememberingMonitor extends RememberingMonitor {
     @Override
     public void handleEvent(Event e) {
         super.handleEvent(e);
-        LOGGER.info("{}[{}] Releasing semaphore after handling event [{}]", this.getClass().getSimpleName(), getName(), e);
+        LOGGER.debug("{}[{}] Releasing semaphore after handling event [{}]", this.getClass().getSimpleName(), getName(), e);
         if (semaphore == null){
             throw new IllegalArgumentException("Semaphore expected to be configured");
         }

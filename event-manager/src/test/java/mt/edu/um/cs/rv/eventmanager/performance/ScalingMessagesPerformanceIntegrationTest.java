@@ -111,6 +111,12 @@ public class ScalingMessagesPerformanceIntegrationTest {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test999Events() throws InterruptedException {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
     private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException {
 
         int numberOfTotalEventsToBeProcessed =

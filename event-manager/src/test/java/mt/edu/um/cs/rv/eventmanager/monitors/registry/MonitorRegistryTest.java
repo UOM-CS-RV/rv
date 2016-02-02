@@ -1,6 +1,7 @@
 package mt.edu.um.cs.rv.eventmanager.monitors.registry;
 
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
+import mt.edu.um.cs.rv.eventmanager.engine.MonitorEventSelector;
 import mt.edu.um.cs.rv.monitors.Monitor;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,28 +51,11 @@ public class MonitorRegistryTest {
 
         monitorRegistry.registerNewMonitor(monitor);
 
-        verify(recipientListRouter, times(1)).addRecipient(any(MessageChannel.class), any(MessageSelector.class));
+        verify(recipientListRouter, times(1)).addRecipient(any(MessageChannel.class), any(MonitorEventSelector.class));
 
         verify(configurableApplicationContext, times(2)).getBeanFactory();
 
         verify(beanFactory, times(2)).registerSingleton(any(), any());
-
-    }
-
-    @Test
-    public void testRegisterNewMonitorWithAllConfig() {
-
-        Monitor monitor = mock(Monitor.class);
-        AbstractSubscribableChannel inputMessageChannel = mock(AbstractSubscribableChannel.class);
-        MessageSelector messageSelector = mock(MessageSelector.class);
-
-        monitorRegistry.registerNewMonitor(monitor, inputMessageChannel, messageSelector);
-
-        verify(recipientListRouter, times(1)).addRecipient(inputMessageChannel, messageSelector);
-
-        verify(configurableApplicationContext, times(1)).getBeanFactory();
-
-        verify(beanFactory, times(1)).registerSingleton(any(), any());
 
     }
 

@@ -45,10 +45,10 @@ public class MonitorRegistry {
         return registerNewMonitor(monitor, subscribableChannel, selector);
     }
 
-    public ServiceActivatingHandler registerNewMonitor(
+    private ServiceActivatingHandler registerNewMonitor(
             Monitor monitor,
             AbstractSubscribableChannel inputMessageChannel,
-            MessageSelector messageSelector) {
+            MonitorEventSelector messageSelector) {
 
 
         MonitorInvocationSupport monitorInvocationSupport = new MonitorInvocationSupport(monitor);

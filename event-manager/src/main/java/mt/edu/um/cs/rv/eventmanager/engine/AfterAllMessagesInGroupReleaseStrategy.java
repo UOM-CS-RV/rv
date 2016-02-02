@@ -31,7 +31,7 @@ public class AfterAllMessagesInGroupReleaseStrategy implements ReleaseStrategy {
             Integer messagesSeen = group.getMessages().size();
 
             if (sequenceSize.equals(messagesSeen)){
-                LOGGER.info("Releasing group as number of expected messages = number of seen [{}]", group.getSequenceSize());
+                LOGGER.debug("Releasing group as number of expected messages = number of seen [{}]", group.getSequenceSize());
                 return true;
             } else {
                 return false;
