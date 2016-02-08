@@ -55,7 +55,7 @@ public class MonitorRegistryTest {
 
         verify(configurableApplicationContext, times(2)).getBeanFactory();
 
-        verify(beanFactory, times(2)).registerSingleton(any(), any());
+        verify(beanFactory, times(2)).registerSingleton(any(String.class), any());
 
     }
 

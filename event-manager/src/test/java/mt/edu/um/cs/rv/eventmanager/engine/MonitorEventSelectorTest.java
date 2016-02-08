@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.messaging.Message;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
@@ -25,7 +26,9 @@ public class MonitorEventSelectorTest {
     public void setup(){
         Monitor monitor = mock(Monitor.class);
 
-        Set<Class<? extends Event>> requiredEvents = Sets.newSet(TestEvent.class);
+        Set<Class<? extends Event>> requiredEvents = new HashSet<>();
+        requiredEvents.add(TestEvent.class);
+
         when(monitor.requiredEvents()).thenReturn(requiredEvents);
 
         this.monitorEventSelector = new MonitorEventSelector(monitor);

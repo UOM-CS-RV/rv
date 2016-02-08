@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.NullChannel;
 import org.springframework.integration.core.MessagingTemplate;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
 import static org.mockito.Matchers.any;
@@ -37,12 +38,12 @@ public class EventMessageSenderTest {
     @Test
     public void testSendSyncEvent() {
 
-        when(messagingTemplate.sendAndReceive(eq(executorChannel), any())).thenReturn(new GenericMessage(""));
+        when(messagingTemplate.sendAndReceive(eq(executorChannel), any(Message.class))).thenReturn(new GenericMessage(""));
 
         Event e = new TestEvent(true);
         eventMessageSender.send(e);
 
-        verify(messagingTemplate, times(1)).sendAndReceive(eq(executorChannel), any());
+        verify(messagingTemplate, times(1)).sendAndReceive(eq(executorChannel), any(Message.class));
     }
 
     @Test
@@ -51,6 +52,6 @@ public class EventMessageSenderTest {
         Event e = new TestEvent(false);
         eventMessageSender.send(e);
 
-        verify(messagingTemplate, times(1)).send(eq(executorChannel), any());
+        verify(messagingTemplate, times(1)).send(eq(executorChannel), any(Message.class));
     }
 }
