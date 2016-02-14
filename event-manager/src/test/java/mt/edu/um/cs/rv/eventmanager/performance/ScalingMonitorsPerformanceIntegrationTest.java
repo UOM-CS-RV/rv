@@ -35,7 +35,8 @@ import java.util.regex.Pattern;
 @AxisRange(min = 0, max = 1)
 @BenchmarkMethodChart(filePrefix = "scaling-monitors")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ScalingMonitorsPerformanceIntegrationTest {
+public class ScalingMonitorsPerformanceIntegrationTest
+{
 
     @Autowired
     MonitorRegistry monitorRegistry;
@@ -53,16 +54,20 @@ public class ScalingMonitorsPerformanceIntegrationTest {
     public BenchmarkRule benchmarkRun = new BenchmarkRule();
 
     private Semaphore semaphore;
+
     private int numberOfMonitors;
+
     private int numberOfEventsForEachType = 30;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() throws Exception
+    {
 
         String methodName = name.getMethodName();
         Pattern methodNamePattern = Pattern.compile("(test)(\\d+)(\\D+)");
         Matcher m = methodNamePattern.matcher(methodName);
-        if (m.matches()) {
+        if (m.matches())
+        {
             this.numberOfMonitors = Integer.parseInt(m.group(2));
         }
 
@@ -72,12 +77,19 @@ public class ScalingMonitorsPerformanceIntegrationTest {
                         * 3;
 
 
-        if (methodName.endsWith("WithLookupMap")) {
+        if (methodName.endsWith("WithLookupMap"))
+        {
             customRecipientListRouter.setUseLookupMap(true);
         }
 
+        if (methodName.contains("WithActor"))
+        {
+            monitorRegistry.setWithActor(true);
+        }
+
         semaphore = new Semaphore(1 - numberOfTotalEventsToBeProcessed);
-        for (int i = 0; i < numberOfMonitors; i++) {
+        for (int i = 0; i < numberOfMonitors; i++)
+        {
             ReleasingMonitor newMonitor = createNewMonitor(i + 1);
             newMonitor.setSemaphore(semaphore);
             monitorRegistry.registerNewMonitor(newMonitor);
@@ -85,7 +97,8 @@ public class ScalingMonitorsPerformanceIntegrationTest {
     }
 
 
-    private ReleasingMonitor createNewMonitor(int id) {
+    private ReleasingMonitor createNewMonitor(int id)
+    {
         String monitorName = "RR" + String.format("%05d", id);
         Class[] events = {EventA.class, EventB.class, EventC.class};
         ReleasingMonitor releasingMonitor = new ReleasingMonitor(monitorName, events);
@@ -94,68 +107,141 @@ public class ScalingMonitorsPerformanceIntegrationTest {
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test050Monitors() throws InterruptedException {
+    public void test0050Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test0050MonitorsWithLookupMap() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test050MonitorsWithLookupMap() throws InterruptedException {
+    public void test0050MonitorsWithActor() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test100Monitors() throws InterruptedException {
+    public void test0100Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test100MonitorsWithLookupMap() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test100MonitorsWithLookupMap() throws InterruptedException {
+    public void test0100MonitorsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test0150Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test150MonitorsWithLookupMap() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test150Monitors() throws InterruptedException {
+    public void test0150MonitorsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test0200Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test200MonitorsWithLookupMap() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test150MonitorsWithLookupMap() throws InterruptedException {
+    public void test0200MonitorsWithActor() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test200Monitors() throws InterruptedException {
+    public void test300Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test300MonitorsWithLookupMap() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test200MonitorsWithLookupMap() throws InterruptedException {
+    public void test0300MonitorsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test0500MonitorsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test1000MonitorsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @DirtiesContext //ensure full context is reloaded
+    public void test5000MonitorsWithActor() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test300Monitors() throws InterruptedException {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test300MonitorsWithLookupMap() throws InterruptedException {
+    public void test9000MonitorsWithActor() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
 
-    private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException {
+    private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException
+    {
 
-        for (int i = 0; i < numberOfEventsForEachType; i++) {
+        for (int i = 0; i < numberOfEventsForEachType; i++)
+        {
             //send A event
             EventA eventA = new EventA(false, i);
             directInvocationEventObserver.observeEvent(eventA);

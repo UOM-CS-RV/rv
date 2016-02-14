@@ -3,15 +3,15 @@ package mt.edu.um.cs.rv.eventmanager.monitors.registry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.MonitorEventSelector;
-import mt.edu.um.cs.rv.eventmanager.monitors.MonitorInvocationSupport;
+import mt.edu.um.cs.rv.eventmanager.monitors.MonitorInvocationServiceActivator;
 import mt.edu.um.cs.rv.monitors.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
 import org.springframework.integration.channel.ExecutorChannel;
-import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.handler.ServiceActivatingHandler;
 
+import javax.annotation.PostConstruct;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -21,7 +21,8 @@ import java.util.concurrent.ThreadFactory;
 /**
  * Created by dwardu on 23/01/2016.
  */
-public class MonitorRegistry {
+public class MonitorRegistry
+{
 
     @Autowired
     protected CustomRecipientListRouter recipientListRouter;
@@ -29,14 +30,24 @@ public class MonitorRegistry {
     @Autowired
     protected ConfigurableApplicationContext configurableApplicationContext;
 
-    public ServiceActivatingHandler registerNewMonitor(Monitor monitor) {
-        String channelName = monitor + "-" + UUID.randomUUID().toString();
+    private boolean withActor = false;
 
+    ExecutorService executor;
+
+    @PostConstruct
+    public void init()
+    {
+        String monitor = "monitor-scheduler";
         ThreadFactory channelThread = new ThreadFactoryBuilder()
                 .setNameFormat(monitor + "-%d")
                 .setDaemon(true)
                 .build();
-        ExecutorService executor = Executors.newSingleThreadExecutor(channelThread);
+        executor = Executors.newSingleThreadExecutor(channelThread);
+    }
+
+    public ServiceActivatingHandler registerNewMonitor(Monitor monitor)
+    {
+        String channelName = monitor + "-" + UUID.randomUUID().toString();
 
         AbstractSubscribableChannel subscribableChannel = createChannel(channelName, executor);
 
@@ -48,10 +59,10 @@ public class MonitorRegistry {
     private ServiceActivatingHandler registerNewMonitor(
             Monitor monitor,
             AbstractSubscribableChannel inputMessageChannel,
-            MonitorEventSelector messageSelector) {
+            MonitorEventSelector messageSelector)
+    {
 
-
-        MonitorInvocationSupport monitorInvocationSupport = new MonitorInvocationSupport(monitor);
+        MonitorInvocationServiceActivator monitorInvocationSupport = new MonitorInvocationServiceActivator(monitor, configurableApplicationContext, withActor);
 
         ServiceActivatingHandler serviceActivatingHandler = new ServiceActivatingHandler(monitorInvocationSupport, "invokeMonitor");
 
@@ -65,7 +76,9 @@ public class MonitorRegistry {
         return serviceActivatingHandler;
     }
 
-    private AbstractSubscribableChannel createChannel(String inputChannelName, Executor executor) {
+
+    private AbstractSubscribableChannel createChannel(String inputChannelName, Executor executor)
+    {
         ExecutorChannel subscribableChannel = new ExecutorChannel(executor);
 
         subscribableChannel.setBeanName(inputChannelName);
@@ -76,21 +89,28 @@ public class MonitorRegistry {
         return subscribableChannel;
     }
 
-    public CustomRecipientListRouter getRecipientListRouter() {
+    public CustomRecipientListRouter getRecipientListRouter()
+    {
         return recipientListRouter;
     }
 
-    public void setRecipientListRouter(CustomRecipientListRouter recipientListRouter) {
+    public void setRecipientListRouter(CustomRecipientListRouter recipientListRouter)
+    {
         this.recipientListRouter = recipientListRouter;
     }
 
-    public ConfigurableApplicationContext getConfigurableApplicationContext() {
+    public ConfigurableApplicationContext getConfigurableApplicationContext()
+    {
         return configurableApplicationContext;
     }
 
-    public void setConfigurableApplicationContext(ConfigurableApplicationContext configurableApplicationContext) {
+    public void setConfigurableApplicationContext(ConfigurableApplicationContext configurableApplicationContext)
+    {
         this.configurableApplicationContext = configurableApplicationContext;
     }
 
-
+    public void setWithActor(boolean withActor)
+    {
+        this.withActor = withActor;
+    }
 }

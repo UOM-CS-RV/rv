@@ -10,6 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>monitors</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>../performance-tests</module>
+    </modules>
 
     <dependencies>
         <dependency>

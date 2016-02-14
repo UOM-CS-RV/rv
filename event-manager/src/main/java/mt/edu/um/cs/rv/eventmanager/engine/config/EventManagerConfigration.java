@@ -1,12 +1,16 @@
 package mt.edu.um.cs.rv.eventmanager.engine.config;
 
+import akka.actor.ActorSystem;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import mt.edu.um.cs.rv.eventmanager.adaptors.EventAdaptorConfiguration;
 import mt.edu.um.cs.rv.eventmanager.engine.AfterAllMessagesInGroupReleaseStrategy;
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
@@ -26,13 +30,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import static mt.edu.um.cs.rv.eventmanager.monitors.actors.SpringExtension.SpringExtProvider;
+
 /**
  * Created by dwardu on 18/01/2016.
  */
 @Configuration
 @EnableIntegration
 @Import({EventAdaptorConfiguration.class})
-public class EventManagerConfigration {
+@ComponentScan("mt.edu.um.cs.rv.eventmanager.monitors.actors")
+public class EventManagerConfigration
+{
 
 
     //////////////////////// SCATTERER ////////////////////////
@@ -40,7 +48,8 @@ public class EventManagerConfigration {
     //set up scatter gather distribution - this will be responsible for running the show
     @Bean
     @ServiceActivator(inputChannel = "eventMessageRequestChannel")
-    public MessageHandler scatterGatherDistribution() {
+    public MessageHandler scatterGatherDistribution()
+    {
         ScatterGatherHandler handler = new ScatterGatherHandler(distributor(), gatherer());
 
         //output channel is not set, as output channel will be defined by the incoming message to be used as a sync block
@@ -49,12 +58,14 @@ public class EventManagerConfigration {
     }
 
     @Bean
-    public NullChannel noop() {
+    public NullChannel noop()
+    {
         return new NullChannel();
     }
 
     @Bean
-    ExecutorChannel eventMessageRequestChannel() {
+    ExecutorChannel eventMessageRequestChannel()
+    {
         ThreadFactory channelThread = new ThreadFactoryBuilder()
                 .setNameFormat("EventMessageRequestChannel")
                 .setDaemon(true)
@@ -64,23 +75,27 @@ public class EventManagerConfigration {
     }
 
     @Bean
-    public MessageHandler distributor() {
+    public MessageHandler distributor()
+    {
         return recipientListRouter();
     }
 
-    public CustomRecipientListRouter recipientListRouter() {
+    public CustomRecipientListRouter recipientListRouter()
+    {
         CustomRecipientListRouter router = new CustomRecipientListRouter();
         router.setApplySequence(true);
         return router;
     }
 
     @Bean
-    public MessagingTemplate inputMessagingTemplate() {
+    public MessagingTemplate inputMessagingTemplate()
+    {
         return new MessagingTemplate();
     }
 
     @Bean
-    public EventMessageSender eventMessageSender() {
+    public EventMessageSender eventMessageSender()
+    {
         return new EventMessageSender(inputMessagingTemplate(), eventMessageRequestChannel(), noop());
     }
 
@@ -88,7 +103,8 @@ public class EventManagerConfigration {
     //////////////////////// GATHERER ////////////////////////
 
     @Bean
-    public MessageHandler gatherer() {
+    public MessageHandler gatherer()
+    {
         return new AggregatingMessageHandler(
                 new DefaultAggregatingMessageGroupProcessor(),
                 new SimpleMessageStore(),
@@ -98,8 +114,24 @@ public class EventManagerConfigration {
 
     //////////////////////// MONITOR REGISTRY ////////////////////////
     @Bean
-    public MonitorRegistry monitorRegistry() {
+    public MonitorRegistry monitorRegistry()
+    {
         return new MonitorRegistry();
+    }
+
+
+    ////////////////////////////// other stuff ///////////////////////////
+
+    @Autowired
+    ApplicationContext applicationContext;
+
+    @Bean
+    public ActorSystem actorSystem()
+    {
+        ActorSystem system = ActorSystem.create("AkkaJavaSpring");
+        // initialize the application context in the Akka Spring Extension
+        SpringExtProvider.get(system).initialize(applicationContext);
+        return system;
     }
 
 }

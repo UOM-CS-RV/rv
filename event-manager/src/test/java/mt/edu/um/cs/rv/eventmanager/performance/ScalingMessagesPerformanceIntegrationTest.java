@@ -2,16 +2,12 @@ package mt.edu.um.cs.rv.eventmanager.performance;
 
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
-import com.carrotsearch.junitbenchmarks.annotation.BenchmarkHistoryChart;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
-import com.carrotsearch.junitbenchmarks.annotation.LabelType;
 import mt.edu.um.cs.rv.eventmanager.engine.config.EventManagerConfigration;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventA;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventB;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventC;
-import mt.edu.um.cs.rv.eventmanager.integration.monitors.BlockingAndRememberingMonitor;
 import mt.edu.um.cs.rv.eventmanager.integration.monitors.ReleasingAndRememberingMonitor;
-import mt.edu.um.cs.rv.eventmanager.integration.monitors.RememberingMonitor;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
 import mt.edu.um.cs.rv.events.Event;
@@ -39,7 +35,8 @@ import java.util.regex.Pattern;
 @AxisRange(min = 0, max = 1)
 @BenchmarkMethodChart(filePrefix = "scaling-messages")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ScalingMessagesPerformanceIntegrationTest {
+public class ScalingMessagesPerformanceIntegrationTest
+{
 
     @Autowired
     MonitorRegistry monitorRegistry;
@@ -54,13 +51,30 @@ public class ScalingMessagesPerformanceIntegrationTest {
     public TestRule benchmarkRun = new BenchmarkRule();
 
     ReleasingAndRememberingMonitor releasingAndRememberingMonitor1;
+
     ReleasingAndRememberingMonitor releasingAndRememberingMonitor2;
+
     ReleasingAndRememberingMonitor releasingAndRememberingMonitor3;
 
     private int numberOfEventsForEachType;
 
     @Before
-    public void setup(){
+    public void setup()
+    {
+        String methodName = name.getMethodName();
+        Pattern methodNamePattern = Pattern.compile("(test)(\\d+)(\\D+)");
+        Matcher m = methodNamePattern.matcher(methodName);
+        if (m.matches())
+        {
+            this.numberOfEventsForEachType = Integer.parseInt(m.group(2));
+        }
+
+
+        if (methodName.contains("WithActor"))
+        {
+            monitorRegistry.setWithActor(true);
+        }
+
         //create monitors
         releasingAndRememberingMonitor1 = new ReleasingAndRememberingMonitor("RR1", new Class[]{EventA.class, EventB.class});
         monitorRegistry.registerNewMonitor(releasingAndRememberingMonitor1);
@@ -71,61 +85,102 @@ public class ScalingMessagesPerformanceIntegrationTest {
         releasingAndRememberingMonitor3 = new ReleasingAndRememberingMonitor("RR3", new Class[]{EventA.class, EventC.class});
         monitorRegistry.registerNewMonitor(releasingAndRememberingMonitor3);
 
-        String methodName = name.getMethodName();
-        Pattern methodNamePattern = Pattern.compile("(test)(\\d+)(\\D+)");
-        Matcher m = methodNamePattern.matcher(methodName);
-        if (m.matches()) {
-            this.numberOfEventsForEachType = Integer.parseInt(m.group(2));
-        }
-
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test100Events() throws InterruptedException {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test200Events() throws InterruptedException {
+    public void test100Events() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test300Events() throws InterruptedException {
+    public void test100EventsWithActor() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test400Events() throws InterruptedException {
+    public void test200Events() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test500Events() throws InterruptedException {
+    public void test200EventsWithActor() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test999Events() throws InterruptedException {
+    public void test300Events() throws InterruptedException
+    {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
-    private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException {
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test300EventsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test400Events() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test400EventsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test500Events() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test500EventsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test999Events() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test999EventsWithActor() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException
+    {
 
         int numberOfTotalEventsToBeProcessed =
                 (numberOfEventsForEachType * 2) //monitor RR1 interested in A & B
-                + (numberOfEventsForEachType * 2) //monitor RR2 interested in B & C
-                + (numberOfEventsForEachType * 2); //monitor RR3 interested in A & C
+                        + (numberOfEventsForEachType * 2) //monitor RR2 interested in B & C
+                        + (numberOfEventsForEachType * 2); //monitor RR3 interested in A & C
 
         //create sempahore
-        Semaphore semaphore = new Semaphore(1-numberOfTotalEventsToBeProcessed);
+        Semaphore semaphore = new Semaphore(1 - numberOfTotalEventsToBeProcessed);
         releasingAndRememberingMonitor1.setSemaphore(semaphore);
         releasingAndRememberingMonitor2.setSemaphore(semaphore);
         releasingAndRememberingMonitor3.setSemaphore(semaphore);
@@ -135,7 +190,8 @@ public class ScalingMessagesPerformanceIntegrationTest {
         List<Event> expectedForMonitorRR2 = new ArrayList<>();
         List<Event> expectedForMonitorRR3 = new ArrayList<>();
 
-        for (int i = 0; i < numberOfEventsForEachType; i++){
+        for (int i = 0; i < numberOfEventsForEachType; i++)
+        {
             //send A event
             EventA eventA = new EventA(false, i);
             expectedForMonitorRR1.add(eventA);
@@ -160,11 +216,11 @@ public class ScalingMessagesPerformanceIntegrationTest {
 
         //assert the right order for all monitors
         Assert.assertEquals("Events as observed by monitor RR1 are not the expected events or were not observed in the right order",
-                expectedForMonitorRR1, releasingAndRememberingMonitor1.getAllOrderedEvents());
+                            expectedForMonitorRR1, releasingAndRememberingMonitor1.getAllOrderedEvents());
         Assert.assertEquals("Events as observed by monitor RR2 are not the expected events or were not observed in the right order",
-                expectedForMonitorRR2, releasingAndRememberingMonitor2.getAllOrderedEvents());
+                            expectedForMonitorRR2, releasingAndRememberingMonitor2.getAllOrderedEvents());
         Assert.assertEquals("Events as observed by monitor RR3 are not the expected events or were not observed in the right order",
-                expectedForMonitorRR3, releasingAndRememberingMonitor3.getAllOrderedEvents());
+                            expectedForMonitorRR3, releasingAndRememberingMonitor3.getAllOrderedEvents());
 
     }
 
