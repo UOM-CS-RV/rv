@@ -1,14 +1,11 @@
 package mt.edu.um.cs.rv.eventmanager.engine.config;
 
-import akka.actor.ActorSystem;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import mt.edu.um.cs.rv.eventmanager.adaptors.EventAdaptorConfiguration;
 import mt.edu.um.cs.rv.eventmanager.engine.AfterAllMessagesInGroupReleaseStrategy;
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -29,8 +26,6 @@ import org.springframework.messaging.MessageHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
-import static mt.edu.um.cs.rv.eventmanager.monitors.actors.SpringExtension.SpringExtProvider;
 
 /**
  * Created by dwardu on 18/01/2016.
@@ -119,20 +114,6 @@ public class EventManagerConfigration
         return new MonitorRegistry();
     }
 
-
-    ////////////////////////////// other stuff ///////////////////////////
-
-    @Autowired
-    ApplicationContext applicationContext;
-
-    @Bean
-    public ActorSystem actorSystem()
-    {
-        ActorSystem system = ActorSystem.create("AkkaJavaSpring");
-        // initialize the application context in the Akka Spring Extension
-        SpringExtProvider.get(system).initialize(applicationContext);
-        return system;
-    }
 
 }
 

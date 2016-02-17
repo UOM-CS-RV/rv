@@ -12,6 +12,7 @@ import org.springframework.integration.channel.AbstractSubscribableChannel;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.scheduling.TaskScheduler;
 
 import java.util.concurrent.Executor;
 
@@ -37,11 +38,15 @@ public class MonitorRegistryTest {
         configurableApplicationContext = mock(ConfigurableApplicationContext.class);
         beanFactory = mock(ConfigurableListableBeanFactory.class);
         when(configurableApplicationContext.getBeanFactory()).thenReturn(beanFactory);
+
+        TaskScheduler taskScheduler = mock(TaskScheduler.class);
         Executor executor = mock(Executor.class);
 
         monitorRegistry = new MonitorRegistry();
         monitorRegistry.setRecipientListRouter(recipientListRouter);
         monitorRegistry.setConfigurableApplicationContext(configurableApplicationContext);
+        monitorRegistry.setExecutor(executor);
+        monitorRegistry.setTaskScheduler(taskScheduler);
     }
 
     @Test
@@ -53,7 +58,7 @@ public class MonitorRegistryTest {
 
         verify(recipientListRouter, times(1)).addRecipient(any(MessageChannel.class), any(MonitorEventSelector.class));
 
-        verify(configurableApplicationContext, times(2)).getBeanFactory();
+        verify(configurableApplicationContext, times(3)).getBeanFactory();
 
         verify(beanFactory, times(2)).registerSingleton(any(String.class), any());
 

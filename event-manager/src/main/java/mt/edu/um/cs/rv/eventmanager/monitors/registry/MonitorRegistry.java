@@ -7,18 +7,22 @@ import mt.edu.um.cs.rv.eventmanager.monitors.MonitorInvocationServiceActivator;
 import mt.edu.um.cs.rv.monitors.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.integration.channel.AbstractPollableChannel;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
 import org.springframework.integration.channel.ExecutorChannel;
+import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.endpoint.PollingConsumer;
 import org.springframework.integration.handler.ServiceActivatingHandler;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.PeriodicTrigger;
 
 import javax.annotation.PostConstruct;
 import java.util.UUID;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
+ * The Monitor Registry is responsible for registering new monitors within the event system.  The monitor
+ * create the necessary threads, channels, beans and bean registrations.
  * Created by dwardu on 23/01/2016.
  */
 public class MonitorRegistry
@@ -30,43 +34,56 @@ public class MonitorRegistry
     @Autowired
     protected ConfigurableApplicationContext configurableApplicationContext;
 
-    private boolean withActor = false;
+    @Autowired
+    protected Executor executor;
 
-    ExecutorService executor;
+    @Autowired
+    private TaskScheduler taskScheduler;
 
     @PostConstruct
     public void init()
     {
-        String monitor = "monitor-scheduler";
-        ThreadFactory channelThread = new ThreadFactoryBuilder()
-                .setNameFormat(monitor + "-%d")
-                .setDaemon(true)
-                .build();
-        executor = Executors.newSingleThreadExecutor(channelThread);
+//        String monitor = "monitor-scheduler";
+//        ThreadFactory channelThread = new ThreadFactoryBuilder()
+//                .setNameFormat(monitor + "-%d")
+//                .setDaemon(true)
+//                .build();
+//        executor = Executors.newSingleThreadExecutor(channelThread);
     }
 
     public ServiceActivatingHandler registerNewMonitor(Monitor monitor)
     {
         String channelName = monitor + "-" + UUID.randomUUID().toString();
 
-        AbstractSubscribableChannel subscribableChannel = createChannel(channelName, executor);
+        AbstractPollableChannel pollableChannel = createChannel(channelName);
 
         MonitorEventSelector selector = new MonitorEventSelector(monitor);
 
-        return registerNewMonitor(monitor, subscribableChannel, selector);
+        return registerNewMonitor(monitor, pollableChannel, selector);
     }
 
     private ServiceActivatingHandler registerNewMonitor(
             Monitor monitor,
-            AbstractSubscribableChannel inputMessageChannel,
+            AbstractPollableChannel inputMessageChannel,
             MonitorEventSelector messageSelector)
     {
 
-        MonitorInvocationServiceActivator monitorInvocationSupport = new MonitorInvocationServiceActivator(monitor, configurableApplicationContext, withActor);
+        MonitorInvocationServiceActivator monitorInvocationSupport = new MonitorInvocationServiceActivator(monitor, configurableApplicationContext);
 
         ServiceActivatingHandler serviceActivatingHandler = new ServiceActivatingHandler(monitorInvocationSupport, "invokeMonitor");
 
-        inputMessageChannel.subscribe(serviceActivatingHandler);
+        PollingConsumer pollingConsumer = new PollingConsumer(inputMessageChannel, serviceActivatingHandler);
+
+        PeriodicTrigger trigger = new PeriodicTrigger(10, TimeUnit.MILLISECONDS);
+        pollingConsumer.setTrigger(trigger);
+        pollingConsumer.setMaxMessagesPerPoll(1);
+        pollingConsumer.setTaskExecutor(executor);
+        pollingConsumer.setTaskScheduler(taskScheduler);
+        pollingConsumer.setBeanFactory(configurableApplicationContext.getBeanFactory());
+        pollingConsumer.setReceiveTimeout(0);
+
+
+        pollingConsumer.start();
 
         recipientListRouter.addRecipient(inputMessageChannel, messageSelector);
 
@@ -77,16 +94,16 @@ public class MonitorRegistry
     }
 
 
-    private AbstractSubscribableChannel createChannel(String inputChannelName, Executor executor)
+    private AbstractPollableChannel createChannel(String inputChannelName)
     {
-        ExecutorChannel subscribableChannel = new ExecutorChannel(executor);
+        QueueChannel queueChannel = new QueueChannel();
 
-        subscribableChannel.setBeanName(inputChannelName);
-        subscribableChannel.setBeanFactory(configurableApplicationContext);
+        queueChannel.setBeanName(inputChannelName);
+        queueChannel.setBeanFactory(configurableApplicationContext);
 
-        configurableApplicationContext.getBeanFactory().registerSingleton(inputChannelName, subscribableChannel);
+        configurableApplicationContext.getBeanFactory().registerSingleton(inputChannelName, queueChannel);
 
-        return subscribableChannel;
+        return queueChannel;
     }
 
     public CustomRecipientListRouter getRecipientListRouter()
@@ -109,8 +126,23 @@ public class MonitorRegistry
         this.configurableApplicationContext = configurableApplicationContext;
     }
 
-    public void setWithActor(boolean withActor)
+    public Executor getExecutor()
     {
-        this.withActor = withActor;
+        return executor;
+    }
+
+    public void setExecutor(Executor executor)
+    {
+        this.executor = executor;
+    }
+
+    public TaskScheduler getTaskScheduler()
+    {
+        return taskScheduler;
+    }
+
+    public void setTaskScheduler(TaskScheduler taskScheduler)
+    {
+        this.taskScheduler = taskScheduler;
     }
 }
