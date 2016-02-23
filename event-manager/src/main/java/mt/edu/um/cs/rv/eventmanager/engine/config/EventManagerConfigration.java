@@ -33,7 +33,6 @@ import java.util.concurrent.ThreadFactory;
 @Configuration
 @EnableIntegration
 @Import({EventAdaptorConfiguration.class})
-@ComponentScan("mt.edu.um.cs.rv.eventmanager.monitors.actors")
 public class EventManagerConfigration
 {
 
