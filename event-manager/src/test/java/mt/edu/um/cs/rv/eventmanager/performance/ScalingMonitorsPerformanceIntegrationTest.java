@@ -1,5 +1,6 @@
 package mt.edu.um.cs.rv.eventmanager.performance;
 
+import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
@@ -11,18 +12,20 @@ import mt.edu.um.cs.rv.eventmanager.integration.events.EventC;
 import mt.edu.um.cs.rv.eventmanager.integration.monitors.ReleasingMonitor;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,11 +35,13 @@ import java.util.regex.Pattern;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration({EventManagerConfigration.class})
-@AxisRange(min = 0, max = 1)
-@BenchmarkMethodChart(filePrefix = "scaling-monitors")
+//@AxisRange(min = 0, max = 1)
+//@BenchmarkMethodChart(filePrefix = "scaling-monitors")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ScalingMonitorsPerformanceIntegrationTest
 {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(ScalingMonitorsPerformanceIntegrationTest.class);
 
     @Autowired
     MonitorRegistry monitorRegistry;
@@ -50,14 +55,23 @@ public class ScalingMonitorsPerformanceIntegrationTest
     @Rule
     public TestName name = new TestName();
 
-    @Rule
-    public BenchmarkRule benchmarkRun = new BenchmarkRule();
+//    @Rule
+//    public BenchmarkRule benchmarkRun = new BenchmarkRule();
 
     private Semaphore semaphore;
 
     private int numberOfMonitors;
 
     private int numberOfEventsForEachType = 30;
+
+
+    @BeforeClass
+    public static void beforeClass() throws InterruptedException
+    {
+        LOGGER.info("SLEEPING");
+//        Thread.sleep(30000);
+        LOGGER.info("GOING");
+    }
 
     @Before
     public void setup() throws Exception
@@ -116,29 +130,14 @@ public class ScalingMonitorsPerformanceIntegrationTest
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test0100Monitors() throws InterruptedException
+    public void test00100Monitors() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test0100MonitorsWithLookupMap() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test0200Monitors() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test0200MonitorsWithLookupMap() throws InterruptedException
+    public void test00100MonitorsWithLookupMap() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
@@ -146,29 +145,14 @@ public class ScalingMonitorsPerformanceIntegrationTest
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test0300Monitors() throws InterruptedException
+    public void test00200Monitors() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test0300MonitorsWithLookupMap() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test0400Monitors() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test0400MonitorsWithLookupMap() throws InterruptedException
+    public void test00200MonitorsWithLookupMap() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
@@ -176,43 +160,14 @@ public class ScalingMonitorsPerformanceIntegrationTest
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test0500Monitors() throws InterruptedException
+    public void test00300Monitors() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test0500MonitorsWithLookupMap() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test1000Monitors() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test1000MonitorsWithLookupMap() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test5000Monitors() throws InterruptedException
-    {
-        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
-    }
-
-    @Test
-    @DirtiesContext //ensure full context is reloaded
-    public void test5000MonitorsWithLookupMap() throws InterruptedException
+    public void test00300MonitorsWithLookupMap() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
@@ -220,14 +175,101 @@ public class ScalingMonitorsPerformanceIntegrationTest
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test9999Monitors() throws InterruptedException
+    public void test00400Monitors() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void test9999MonitorsWithLookupMap() throws InterruptedException
+    public void test00400MonitorsWithLookupMap() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test00500Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test00500MonitorsWithLookupMap() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test01000Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test01000MonitorsWithLookupMap() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test05000Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test05000MonitorsWithLookupMap() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test09999Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test09999MonitorsWithLookupMap() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test20000Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test20000MonitorsWithLookupMap() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test50000Monitors() throws InterruptedException
+    {
+        testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
+    }
+
+    @Test
+    @DirtiesContext //ensure full context is reloaded
+    public void test50000MonitorsWithLookupMap() throws InterruptedException
     {
         testEnsureMonitorsReceiveEventsInTheRightOrder(numberOfEventsForEachType);
     }
@@ -235,6 +277,11 @@ public class ScalingMonitorsPerformanceIntegrationTest
 
     private void testEnsureMonitorsReceiveEventsInTheRightOrder(int numberOfEventsForEachType) throws InterruptedException
     {
+        System.out.println();
+        System.out.println("=======================================================");
+        System.out.println(name.getMethodName());
+        long start = System.currentTimeMillis();
+        System.out.println("Start: " + start);
 
         for (int i = 0; i < numberOfEventsForEachType; i++)
         {
@@ -249,10 +296,16 @@ public class ScalingMonitorsPerformanceIntegrationTest
             //send C event
             EventC eventC = new EventC(false, i);
             directInvocationEventObserver.observeEvent(eventC);
+
         }
 
         //wait for all processing to finish
         semaphore.acquire();
+
+        long end = System.currentTimeMillis();
+        System.out.println("End: " + end);
+        System.out.println("Duration: " + (end-start));
+        System.out.println("=======================================================");
 
     }
 
