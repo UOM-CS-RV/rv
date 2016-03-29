@@ -17,8 +17,11 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The Monitor Registry is responsible for registering new monitors within the event system.  The monitor
@@ -39,6 +42,13 @@ public class MonitorRegistry
 
     @Autowired
     private TaskScheduler taskScheduler;
+
+    private List<PollingConsumer> pollingConsumers = new ArrayList<>();
+
+
+    //TODO make this proper
+    private volatile boolean autoStartup = true;
+    private volatile boolean running;
 
     @PostConstruct
     public void init()
@@ -81,14 +91,18 @@ public class MonitorRegistry
         pollingConsumer.setTaskScheduler(taskScheduler);
         pollingConsumer.setBeanFactory(configurableApplicationContext.getBeanFactory());
         pollingConsumer.setReceiveTimeout(0);
+        pollingConsumer.setAutoStartup(autoStartup);
+        if (autoStartup)
+        {
+            pollingConsumer.start();
+        }
+        pollingConsumers.add(pollingConsumer);
 
-
-        pollingConsumer.start();
 
         recipientListRouter.addRecipient(inputMessageChannel, messageSelector);
 
         String serviceActivatorName = monitor.getName() + "-" + inputMessageChannel.getComponentName() + UUID.randomUUID().toString();
-        configurableApplicationContext.getBeanFactory().registerSingleton(serviceActivatorName, serviceActivatingHandler);
+//        configurableApplicationContext.getBeanFactory().registerSingleton(serviceActivatorName, serviceActivatingHandler);
 
         return serviceActivatingHandler;
     }
@@ -101,7 +115,7 @@ public class MonitorRegistry
         queueChannel.setBeanName(inputChannelName);
         queueChannel.setBeanFactory(configurableApplicationContext);
 
-        configurableApplicationContext.getBeanFactory().registerSingleton(inputChannelName, queueChannel);
+//        configurableApplicationContext.getBeanFactory().registerSingleton(inputChannelName, queueChannel);
 
         return queueChannel;
     }
@@ -144,5 +158,29 @@ public class MonitorRegistry
     public void setTaskScheduler(TaskScheduler taskScheduler)
     {
         this.taskScheduler = taskScheduler;
+    }
+
+    public boolean isAutoStartup()
+    {
+        return autoStartup;
+    }
+
+    public void setAutoStartup(boolean autoStartup)
+    {
+        this.autoStartup = autoStartup;
+    }
+
+    public void start(){
+        for (PollingConsumer pollingConsumer : pollingConsumers)
+        {
+            pollingConsumer.start();
+        }
+    }
+
+    public void stop(){
+        for (PollingConsumer pollingConsumer : pollingConsumers)
+        {
+            pollingConsumer.stop();
+        }
     }
 }

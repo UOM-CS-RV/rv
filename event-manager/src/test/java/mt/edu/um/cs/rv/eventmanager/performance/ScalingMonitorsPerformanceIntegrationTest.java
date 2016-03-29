@@ -35,8 +35,8 @@ import java.util.regex.Pattern;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration({EventManagerConfigration.class})
-//@AxisRange(min = 0, max = 1)
-//@BenchmarkMethodChart(filePrefix = "scaling-monitors")
+@AxisRange(min = 0, max = 1)
+@BenchmarkMethodChart(filePrefix = "scaling-monitors")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ScalingMonitorsPerformanceIntegrationTest
 {
@@ -55,8 +55,8 @@ public class ScalingMonitorsPerformanceIntegrationTest
     @Rule
     public TestName name = new TestName();
 
-//    @Rule
-//    public BenchmarkRule benchmarkRun = new BenchmarkRule();
+    @Rule
+    public BenchmarkRule benchmarkRun = new BenchmarkRule();
 
     private Semaphore semaphore;
 
@@ -96,13 +96,22 @@ public class ScalingMonitorsPerformanceIntegrationTest
             customRecipientListRouter.setUseLookupMap(true);
         }
 
+        //set not autostartup to false
+        monitorRegistry.setAutoStartup(false);
+
         semaphore = new Semaphore(1 - numberOfTotalEventsToBeProcessed);
         for (int i = 0; i < numberOfMonitors; i++)
         {
             ReleasingMonitor newMonitor = createNewMonitor(i + 1);
             newMonitor.setSemaphore(semaphore);
+            LOGGER.info("Registering new monitor {}", i);
             monitorRegistry.registerNewMonitor(newMonitor);
         }
+
+        LOGGER.info("Starting monitor registry");
+        //start monitor registry
+        monitorRegistry.start();
+        LOGGER.info("Started monitor registry");
     }
 
 
