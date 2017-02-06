@@ -23,7 +23,7 @@ public abstract class ExternalEventObserver<M,T extends TriggerData,R>
         Boolean shouldEventBeSynchronous = shouldEventBeSynchronous(trigger);
 
         EventBuilder builder = eventBuilderRegistry.getBuilder(trigger.getClass());
-        Event event = builder.build(shouldEventBeSynchronous);
+        Event event = builder.build(trigger, shouldEventBeSynchronous);
         if (builder.shouldFireEvent(event)) {
             fireEvent(event);
         }

@@ -12,9 +12,7 @@ public interface EventBuilder<T extends TriggerData, E extends Event>
 
     Class<T> forTrigger();
 
-    void setupEventDataFromTrigger(T t);
-
-    E build(Boolean synchronous);
+    E build(T t, Boolean synchronous);
 
     Boolean shouldFireEvent(E e);
 }
