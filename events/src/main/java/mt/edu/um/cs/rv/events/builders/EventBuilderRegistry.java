@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,15 +21,18 @@ public class EventBuilderRegistry
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventBuilderRegistry.class);
 
-    @Autowired
+    @Autowired(required = false)
     private List<EventBuilder> eventBuilders;
 
-    private Map<Class<? extends TriggerData>
-
-            , EventBuilder> buildersMap;
+    private Map<Class<? extends TriggerData>, EventBuilder> buildersMap;
 
     @PostConstruct
     public void init(){
+        //just in case there are no event builders to wire in, create an empty list
+        if (eventBuilders == null){
+            eventBuilders = new ArrayList<>();
+        }
+
         buildersMap = eventBuilders
                 .stream()
                 .collect(
