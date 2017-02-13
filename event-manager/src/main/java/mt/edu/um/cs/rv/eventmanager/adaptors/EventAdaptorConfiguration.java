@@ -2,6 +2,7 @@ package mt.edu.um.cs.rv.eventmanager.adaptors;
 
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
+import mt.edu.um.cs.rv.events.builders.EventBuilderRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,11 @@ public class EventAdaptorConfiguration {
     @Bean
     public DirectInvocationEventObserver directInvocationEventAdaptor(EventMessageSender eventMessageSender) {
         return new DirectInvocationEventObserver(eventMessageSender);
+    }
+
+    @Bean
+    public EventBuilderRegistry eventBuilderRegistry(){
+        return new EventBuilderRegistry();
     }
 
 }
