@@ -2,6 +2,7 @@ package mt.edu.um.cs.rv.eventmanager.monitors;
 
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.Monitor;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -19,11 +20,9 @@ public class MonitorInvocationServiceActivator
         this.monitor = monitor;
         this.applicationContext = applicationContext;
     }
-
-    //TODO change return type to a more elaborate type
-    public Boolean invokeMonitor(Event e)
+    
+    public MonitorResult invokeMonitor(Event e)
     {
-        monitor.handleEvent(e);
-        return Boolean.TRUE;
+        return monitor.handleEvent(e);
     }
 }

@@ -2,6 +2,7 @@ package mt.edu.um.cs.rv.eventmanager.observers;
 
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -21,8 +22,8 @@ public class DirectInvocationEventObserver implements EventObserver, Application
     }
 
     @Override
-    public void observeEvent(Event e) {
-        eventMessageSender.send(e);
+    public MonitorResult observeEvent(Event e) {
+        return eventMessageSender.send(e);
     }
 
     /**

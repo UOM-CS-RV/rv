@@ -7,7 +7,6 @@ import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;

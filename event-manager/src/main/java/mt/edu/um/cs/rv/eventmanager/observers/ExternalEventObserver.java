@@ -4,6 +4,7 @@ import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.builders.EventBuilder;
 import mt.edu.um.cs.rv.events.builders.EventBuilderRegistry;
 import mt.edu.um.cs.rv.events.triggers.TriggerData;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -24,23 +25,25 @@ public abstract class ExternalEventObserver<M,T extends TriggerData,R>
 
         EventBuilder builder = eventBuilderRegistry.getBuilder(trigger.getClass());
         Event event = builder.build(trigger, shouldEventBeSynchronous);
+        //TODO should this be the default ?
+        MonitorResult monitorResult = MonitorResult.ok();
         if (builder.shouldFireEvent(event)) {
-            fireEvent(event);
+            monitorResult = fireEvent(event);
         }
 
-        R r = generateResponse(message, trigger);
+        R r = generateResponse(message, trigger, monitorResult);
         sendResponse(r);
     }
 
-    protected final void fireEvent(Event event){
+    protected final MonitorResult fireEvent(Event event){
         //TODO should we use the EventMessageSender directly here?
         mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver observer = mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver.getInstance();
-        observer.observeEvent(event);
+        return observer.observeEvent(event);
     }
 
     public abstract T generateTrigger(M m);
 
-    public abstract R generateResponse(M m, T t);
+    public abstract R generateResponse(M m, T t, MonitorResult monitorResult);
 
     public abstract void sendResponse(R r);
 

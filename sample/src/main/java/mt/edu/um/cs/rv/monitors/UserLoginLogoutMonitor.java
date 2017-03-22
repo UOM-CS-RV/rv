@@ -3,6 +3,7 @@ package mt.edu.um.cs.rv.monitors;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.LoginEvent;
 import mt.edu.um.cs.rv.events.LogoutEvent;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessagingException;
@@ -46,7 +47,7 @@ public class UserLoginLogoutMonitor implements Monitor {
     }
 
     @Override
-    public void handleEvent(Event event) throws MessagingException {
+    public MonitorResult handleEvent(Event event) throws MessagingException {
         if (LoginEvent.class.equals(event.getClass())) {
             long l = loginCount.incrementAndGet();
             LOGGER.info("[{}] processing {} for user {}. Total logins observed for user {}: {}", getName(), event.getClass().getName(), username, username, l);
@@ -56,6 +57,6 @@ public class UserLoginLogoutMonitor implements Monitor {
         } else {
             throw new IllegalStateException();
         }
-
+        return MonitorResult.ok();
     }
 }

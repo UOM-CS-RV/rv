@@ -4,6 +4,7 @@ import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.LoginEvent;
 import mt.edu.um.cs.rv.events.LogoutEvent;
 import mt.edu.um.cs.rv.events.UserEvent;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class DelegatingUserLoginLogoutMonitor implements Monitor {
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public MonitorResult handleEvent(Event event) {
         //should be safe due to required events set
         UserEvent userEvent = (UserEvent) event;
         LOGGER.info("[{}] delegating {} for user {}", getName(), event.getClass().getName(), userEvent.getUsername());
@@ -58,5 +59,6 @@ public class DelegatingUserLoginLogoutMonitor implements Monitor {
             }
         }
         LOGGER.info("[{}] delegated {} for user {} to {} UserLoginLogoutMonitor(s)", getName(), event.getClass().getName(), userEvent.getUsername(), handleCount);
+        return MonitorResult.ok();
     }
 }

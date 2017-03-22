@@ -1,6 +1,7 @@
 package mt.edu.um.cs.rv.monitors;
 
 import mt.edu.um.cs.rv.events.Event;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 
 import java.util.Set;
 
@@ -13,5 +14,5 @@ public interface Monitor {
 
     Set<Class<? extends Event>> requiredEvents();
 
-    void handleEvent(Event e);
+    MonitorResult handleEvent(Event e);
 }
