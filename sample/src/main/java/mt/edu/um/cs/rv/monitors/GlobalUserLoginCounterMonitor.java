@@ -3,6 +3,7 @@ package mt.edu.um.cs.rv.monitors;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.LoginEvent;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessagingException;
@@ -38,7 +39,7 @@ public class GlobalUserLoginCounterMonitor implements Monitor {
     }
 
     @Override
-    public MonitorResult handleEvent(Event event) throws MessagingException {
+    public MonitorResult handleEvent(Event event, State s) throws MessagingException {
         long l = loginCount.incrementAndGet();
         LOGGER.info("Processing {}. Total logins observed: {}", event.getClass().getName(), l);
         return MonitorResult.ok();

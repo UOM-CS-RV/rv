@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.Monitor;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class RememberingMonitor implements Monitor {
     }
 
     @Override
-    public MonitorResult handleEvent(Event e) {
+    public MonitorResult handleEvent(Event e, State s) {
         LOGGER.debug("{}[{}] handling event [{}]", this.getClass().getSimpleName(), getName(), e);
         this.allEvents.add(e);
         this.allOrderedEvents.add(e);

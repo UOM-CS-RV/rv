@@ -2,6 +2,7 @@ package mt.edu.um.cs.rv.eventmanager.integration.monitors;
 
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,8 @@ public class ReleasingAndRememberingMonitor extends RememberingMonitor {
     }
 
     @Override
-    public MonitorResult handleEvent(Event e) {
-        super.handleEvent(e);
+    public MonitorResult handleEvent(Event e, State s) {
+        super.handleEvent(e, s);
         LOGGER.debug("{}[{}] Releasing semaphore after handling event [{}]", this.getClass().getSimpleName(), getName(), e);
         if (semaphore == null){
             throw new IllegalArgumentException("Semaphore expected to be configured");

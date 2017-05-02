@@ -23,6 +23,6 @@ public class MonitorInvocationServiceActivator
     
     public MonitorResult invokeMonitor(Event e)
     {
-        return monitor.handleEvent(e);
+        return monitor.handleEvent(e, null);
     }
 }

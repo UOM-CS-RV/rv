@@ -2,6 +2,7 @@ package mt.edu.um.cs.rv.eventmanager.integration.monitors;
 
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class BlockingAndRememberingMonitor extends RememberingMonitor {
     }
 
     @Override
-    public MonitorResult handleEvent(Event e) {
+    public MonitorResult handleEvent(Event e, State s) {
         //sleep
         LOGGER.info("{}[{}] sleeping before handling event [{}]", this.getClass().getSimpleName(), getName(), e);
         try {
@@ -30,7 +31,7 @@ public class BlockingAndRememberingMonitor extends RememberingMonitor {
             e1.printStackTrace();
         }
         LOGGER.info("{}[{}] woke up and handling event [{}]", this.getClass().getSimpleName(), getName(), e);
-        super.handleEvent(e);
+        super.handleEvent(e, s);
         return MonitorResult.ok();
     }
 

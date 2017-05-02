@@ -3,6 +3,7 @@ package mt.edu.um.cs.rv.monitors;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.UserCreatedEvent;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessagingException;
@@ -39,7 +40,7 @@ public class UserCreationMonitor implements Monitor {
     }
 
     @Override
-    public MonitorResult handleEvent(Event event) throws MessagingException {
+    public MonitorResult handleEvent(Event event, State s) throws MessagingException {
         LOGGER.info("Processing {}", event.getClass().getName());
         UserCreatedEvent userCreatedEvent = (UserCreatedEvent) event;
 
