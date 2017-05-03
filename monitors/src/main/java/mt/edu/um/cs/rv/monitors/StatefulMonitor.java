@@ -50,7 +50,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
     protected abstract S initialiseNewState();
 
     protected S loadOrCreateState(Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c, Event e, State parentState){
-        State state = monitorPersistenceProvider.load(c.getTypeName());
+        State state = getMonitorPersistenceProvider().load(c.getTypeName());
 
         if (state == null){
             //create new state
@@ -63,7 +63,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
     }
 
     protected void persistState(Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c, Event e, S s){
-        this.monitorPersistenceProvider.save(c.getTypeName(), s);
+        this.getMonitorPersistenceProvider().save(c.getTypeName(), s);
     }
 
     private List<Class<? extends Monitor>> getInterestedMonitorTypes(final Event e) {
