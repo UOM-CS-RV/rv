@@ -21,7 +21,7 @@ public abstract class ExternalEventObserver<M,T extends TriggerData,R>
     @Autowired
     EventBuilderRegistry eventBuilderRegistry;
 
-    public final void onMessage(M message) {
+    public final R onMessage(M message) {
         LOGGER.debug("Generating Trigger from Message");
         T trigger = generateTrigger(message);
 
@@ -45,7 +45,7 @@ public abstract class ExternalEventObserver<M,T extends TriggerData,R>
         LOGGER.debug("Generating response for trigger");
         R r = generateResponse(message, trigger, monitorResult);
         LOGGER.debug("Sending response for trigger");
-        sendResponse(r);
+        return sendResponse(r);
     }
 
     protected final MonitorResult fireEvent(Event event){
@@ -58,7 +58,7 @@ public abstract class ExternalEventObserver<M,T extends TriggerData,R>
 
     public abstract R generateResponse(M m, T t, MonitorResult monitorResult);
 
-    public abstract void sendResponse(R r);
+    public abstract R sendResponse(R r);
 
     //default implementation
     public Boolean shouldEventBeSynchronous(T t){
