@@ -55,6 +55,10 @@ public class MonitorResultList extends MonitorResult {
         );
     }
 
+    public List<MonitorResult> getResults() {
+        return results;
+    }
+
     @Override
     public String toString() {
         return "MonitorResultList{" +
