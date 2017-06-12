@@ -2,6 +2,7 @@ package mt.edu.um.cs.rv.eventmanager.engine;
 
 import mt.edu.um.cs.rv.eventmanager.common.TestEvent;
 import mt.edu.um.cs.rv.events.Event;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.integration.channel.ExecutorChannel;
@@ -38,7 +39,7 @@ public class EventMessageSenderTest {
     @Test
     public void testSendSyncEvent() {
 
-        when(messagingTemplate.sendAndReceive(eq(executorChannel), any(Message.class))).thenReturn(new GenericMessage(""));
+        when(messagingTemplate.sendAndReceive(eq(executorChannel), any(Message.class))).thenReturn(new GenericMessage(MonitorResult.ok()));
 
         Event e = new TestEvent(true);
         eventMessageSender.send(e);

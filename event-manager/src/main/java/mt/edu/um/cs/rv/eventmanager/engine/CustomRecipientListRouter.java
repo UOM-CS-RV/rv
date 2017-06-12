@@ -1,8 +1,10 @@
 package mt.edu.um.cs.rv.eventmanager.engine;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import mt.edu.um.cs.rv.events.Event;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.router.RecipientListRouter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -24,8 +26,11 @@ public class CustomRecipientListRouter extends RecipientListRouter {
 
     private Multimap eventToMessageChannelMap = ArrayListMultimap.create();
 
-    public CustomRecipientListRouter() {
+    private QueueChannel noInterestedMonitorsQueueChannel;
+    
+    public CustomRecipientListRouter(QueueChannel noInterestedMonitorsQueueChannel) {
         super();
+        this.noInterestedMonitorsQueueChannel = noInterestedMonitorsQueueChannel;
         recipientList = fetchRecipientList();
     }
 
@@ -43,12 +48,18 @@ public class CustomRecipientListRouter extends RecipientListRouter {
 
     @Override
     protected Collection<MessageChannel> determineTargetChannels(Message<?> message) {
+        Collection ret = null;
         if (useLookupMap) {
             Class<?> payloadClass = message.getPayload().getClass();
-            return eventToMessageChannelMap.get(payloadClass);
+            ret = eventToMessageChannelMap.get(payloadClass);
         } else {
-            return super.determineTargetChannels(message);
+            ret = super.determineTargetChannels(message);
         }
+
+        if (ret == null || ret.isEmpty()){
+            ret = ImmutableList.of(noInterestedMonitorsQueueChannel);
+        }
+        return ret;
     }
 
     private ConcurrentLinkedQueue<Recipient> fetchRecipientList() {

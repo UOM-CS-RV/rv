@@ -1,6 +1,5 @@
 package mt.edu.um.cs.rv.eventmanager.integration;
 
-import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.eventmanager.engine.config.EventManagerConfigration;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventA;
 import mt.edu.um.cs.rv.eventmanager.integration.events.EventB;
@@ -12,7 +11,6 @@ import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
 import mt.edu.um.cs.rv.events.Event;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -69,7 +66,7 @@ public class ScatterGatherIntegrationTest {
             directInvocationEventObserver.observeEvent(new EventB(true, i));
         }
 
-        Assert.assertEquals(iterations*2, rememberingMonitor.getAllEvents().size());
+        Assert.assertEquals(iterations * 2, rememberingMonitor.getAllEvents().size());
     }
 
     @Test
@@ -87,7 +84,7 @@ public class ScatterGatherIntegrationTest {
             directInvocationEventObserver.observeEvent(new EventC(true, i));
         }
 
-        Assert.assertEquals(iterations*2, rememberingMonitor.getAllEvents().size());
+        Assert.assertEquals(iterations * 2, rememberingMonitor.getAllEvents().size());
     }
 
     @Test
@@ -107,8 +104,8 @@ public class ScatterGatherIntegrationTest {
             directInvocationEventObserver.observeEvent(new EventC(true, i));
         }
 
-        Assert.assertEquals(iterations*2, rememberingMonitor1.getAllEvents().size());
-        Assert.assertEquals(iterations*2, rememberingMonitor2.getAllEvents().size());
+        Assert.assertEquals(iterations * 2, rememberingMonitor1.getAllEvents().size());
+        Assert.assertEquals(iterations * 2, rememberingMonitor2.getAllEvents().size());
     }
 
     @Test
@@ -117,10 +114,10 @@ public class ScatterGatherIntegrationTest {
 
         int numberOfMonitors = 5;
 
-        Semaphore semaphore = new Semaphore(1-numberOfMonitors);
+        Semaphore semaphore = new Semaphore(1 - numberOfMonitors);
 
-        for (int i = 0; i < numberOfMonitors; i++){
-            ReleasingAndRememberingMonitor releasingAndRememberingMonitor = new ReleasingAndRememberingMonitor("RR"+i, new Class[]{EventA.class}, semaphore);
+        for (int i = 0; i < numberOfMonitors; i++) {
+            ReleasingAndRememberingMonitor releasingAndRememberingMonitor = new ReleasingAndRememberingMonitor("RR" + i, new Class[]{EventA.class}, semaphore);
             monitorRegistry.registerNewMonitor(releasingAndRememberingMonitor);
 
         }
@@ -171,11 +168,11 @@ public class ScatterGatherIntegrationTest {
 
         int numberOfTotalEventsToBeProcessed =
                 (numberOfEventsForEachType * 2) //monitor RR1 interested in A & B
-                + (numberOfEventsForEachType * 2) //monitor RR2 interested in B & C
-                + (numberOfEventsForEachType * 2); //monitor RR3 interested in A & C
+                        + (numberOfEventsForEachType * 2) //monitor RR2 interested in B & C
+                        + (numberOfEventsForEachType * 2); //monitor RR3 interested in A & C
 
         //create sempahore
-        Semaphore semaphore = new Semaphore(1-numberOfTotalEventsToBeProcessed);
+        Semaphore semaphore = new Semaphore(1 - numberOfTotalEventsToBeProcessed);
 
         //create monitors
         ReleasingAndRememberingMonitor releasingAndRememberingMonitor1 = new ReleasingAndRememberingMonitor("RR1", new Class[]{EventA.class, EventB.class}, semaphore);
@@ -192,7 +189,7 @@ public class ScatterGatherIntegrationTest {
         List<Event> expectedForMonitorRR2 = new ArrayList<>();
         List<Event> expectedForMonitorRR3 = new ArrayList<>();
 
-        for (int i = 0; i < numberOfEventsForEachType; i++){
+        for (int i = 0; i < numberOfEventsForEachType; i++) {
             //send A event
             EventA eventA = new EventA(false, i);
             expectedForMonitorRR1.add(eventA);

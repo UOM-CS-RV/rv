@@ -11,7 +11,9 @@ import org.springframework.integration.channel.NullChannel;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -33,6 +35,22 @@ public class EventMessageSender {
     }
 
     public MonitorResult send(Event e) {
+        try {
+            return _send(e);
+        }
+        catch (MessagingException me){
+            String msg = "Unexpected MessageException occurred";
+            LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, me);
+            return MonitorResult.failure(null, me);
+        }
+        catch (Throwable t){
+            String msg = "Unexpected Throwable occurred";
+            LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, t);
+            return MonitorResult.failure(null, t);
+        }
+    }
+
+    private MonitorResult _send(Event e) throws Throwable {
 
         LOGGER.debug("Building event system message from event");
         MessageBuilder<Event> eventMessageBuilder = MessageBuilder.withPayload(e);
@@ -47,19 +65,42 @@ public class EventMessageSender {
 
             LOGGER.debug("Preparing response");
             Object payload = r.getPayload();
+            if (payload == null) {
+                LOGGER.debug("Received a null MonitorResult, creating and returning a OK MonitorResult");
+                return MonitorResult.ok();
+            }
             if (payload instanceof MonitorResult) {
                 LOGGER.debug("Received MonitorResult as response, returning the results");
                 return (MonitorResult) payload;
             }
+            //i.e. event was consumed by more than one top level monitor
             else if (payload instanceof Collection) {
                 LOGGER.debug("Received a collection of MonitorResult as response, returning the results as a MonitorResultList");
-                Collection payloadColl = (Collection) payload;      
-                return MonitorResultList.of(new ArrayList<MonitorResult>(payloadColl));
+                Collection payloadColl = (Collection) payload;
+                MonitorResultList monitorResultList = new MonitorResultList();
+                //TODO how to handle elements which are not MonitorResult
+                payloadColl.stream().forEach(o -> monitorResultList.addMonitorResult((MonitorResult) o));
+                return monitorResultList;
+            }
+            else if (payload instanceof Throwable){
+                throw (Throwable) payload;
             }
             else {
-                //TODO what to do here?
-                LOGGER.debug("Received an unexpected type of response {}. ", payload);
-                return MonitorResult.error();
+                String msg = String.format("Received an unexpected response type of [%s]", payload.getClass());
+
+                Throwable throwable = new RuntimeException(msg);
+                Serializable serializable = msg;
+                if (payload instanceof Throwable){
+                    throwable = (Throwable) payload;
+                }
+                else if (payload instanceof Serializable){
+                    serializable = (Serializable) payload;
+                }
+
+                LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, throwable);
+                MonitorResult<Serializable> failure = MonitorResult.failure(serializable, throwable);
+                LOGGER.error("Created FAILURE MonitorResult [{}]", failure, throwable);
+                return failure;
             }
         }
         else {

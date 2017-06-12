@@ -6,6 +6,8 @@ import mt.edu.um.cs.rv.eventmanager.engine.AfterAllMessagesInGroupReleaseStrateg
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
+import mt.edu.um.cs.rv.eventmanager.monitors.registry.NoInterestedMonitorsHandler;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,15 +18,18 @@ import org.springframework.integration.aggregator.HeaderAttributeCorrelationStra
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.NullChannel;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessagingTemplate;
+import org.springframework.integration.endpoint.PollingConsumer;
+import org.springframework.integration.handler.ServiceActivatingHandler;
 import org.springframework.integration.scattergather.ScatterGatherHandler;
 import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.PeriodicTrigger;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
  * Created by dwardu on 18/01/2016.
@@ -32,8 +37,7 @@ import java.util.concurrent.ThreadFactory;
 @Configuration
 @EnableIntegration
 @Import({EventAdaptorConfiguration.class})
-public class EventManagerConfigration
-{
+public class EventManagerConfigration {
 
 
     //////////////////////// SCATTERER ////////////////////////
@@ -41,8 +45,7 @@ public class EventManagerConfigration
     //set up scatter gather distribution - this will be responsible for running the show
     @Bean
     @ServiceActivator(inputChannel = "eventMessageRequestChannel")
-    public MessageHandler scatterGatherDistribution()
-    {
+    public MessageHandler scatterGatherDistribution() {
         ScatterGatherHandler handler = new ScatterGatherHandler(distributor(), gatherer());
 
         //output channel is not set, as output channel will be defined by the incoming message to be used as a sync block
@@ -51,14 +54,12 @@ public class EventManagerConfigration
     }
 
     @Bean
-    public NullChannel noop()
-    {
+    public NullChannel noop() {
         return new NullChannel();
     }
 
     @Bean
-    ExecutorChannel eventMessageRequestChannel()
-    {
+    ExecutorChannel eventMessageRequestChannel() {
         ThreadFactory channelThread = new ThreadFactoryBuilder()
                 .setNameFormat("EventMessageRequestChannel")
                 .setDaemon(true)
@@ -68,27 +69,23 @@ public class EventManagerConfigration
     }
 
     @Bean
-    public MessageHandler distributor()
-    {
+    public MessageHandler distributor() {
         return recipientListRouter();
     }
 
-    public CustomRecipientListRouter recipientListRouter()
-    {
-        CustomRecipientListRouter router = new CustomRecipientListRouter();
+    public CustomRecipientListRouter recipientListRouter() {
+        CustomRecipientListRouter router = new CustomRecipientListRouter(noInterestedMonitorsQueueChannel());
         router.setApplySequence(true);
         return router;
     }
 
     @Bean
-    public MessagingTemplate inputMessagingTemplate()
-    {
+    public MessagingTemplate inputMessagingTemplate() {
         return new MessagingTemplate();
     }
 
     @Bean
-    public EventMessageSender eventMessageSender()
-    {
+    public EventMessageSender eventMessageSender() {
         return new EventMessageSender(inputMessagingTemplate(), eventMessageRequestChannel(), noop());
     }
 
@@ -96,8 +93,7 @@ public class EventManagerConfigration
     //////////////////////// GATHERER ////////////////////////
 
     @Bean
-    public MessageHandler gatherer()
-    {
+    public MessageHandler gatherer() {
         return new AggregatingMessageHandler(
                 new DefaultAggregatingMessageGroupProcessor(),
                 new SimpleMessageStore(),
@@ -107,9 +103,37 @@ public class EventManagerConfigration
 
     //////////////////////// MONITOR REGISTRY ////////////////////////
     @Bean
-    public MonitorRegistry monitorRegistry()
-    {
+    public MonitorRegistry monitorRegistry() {
         return new MonitorRegistry();
+    }
+
+    @Bean
+    public QueueChannel noInterestedMonitorsQueueChannel() {
+        return new QueueChannel();
+    }
+
+    @Bean
+    public ServiceActivatingHandler noInterestedMonitorsServiceActivatingHandler(
+            Executor executor, TaskScheduler taskScheduler, ConfigurableApplicationContext configurableApplicationContext
+    ) {
+
+        NoInterestedMonitorsHandler noInterestedMonitorsHandler = new NoInterestedMonitorsHandler();
+
+        ServiceActivatingHandler serviceActivatingHandler = new ServiceActivatingHandler(noInterestedMonitorsHandler, "handleEvent");
+
+        PollingConsumer pollingConsumer = new PollingConsumer(noInterestedMonitorsQueueChannel(), serviceActivatingHandler);
+
+        PeriodicTrigger trigger = new PeriodicTrigger(10, TimeUnit.MILLISECONDS);
+        pollingConsumer.setTrigger(trigger);
+        pollingConsumer.setMaxMessagesPerPoll(1);
+        pollingConsumer.setTaskExecutor(executor);
+        pollingConsumer.setTaskScheduler(taskScheduler);
+        pollingConsumer.setBeanFactory(configurableApplicationContext.getBeanFactory());
+        pollingConsumer.setReceiveTimeout(0);
+
+        pollingConsumer.start();
+
+        return serviceActivatingHandler;
     }
 
 

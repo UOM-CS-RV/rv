@@ -4,6 +4,7 @@ import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.persistence.InMemoryMonitorPersistenceProvider;
 import mt.edu.um.cs.rv.monitors.persistence.MonitorPersistenceProvider;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.results.MonitorResultList;
 import mt.edu.um.cs.rv.monitors.state.State;
 
 import java.lang.reflect.InvocationTargetException;
@@ -81,7 +82,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
 
         List<Class<? extends mt.edu.um.cs.rv.monitors.Monitor>> interestedMonitorTypes = getInterestedMonitorTypes(e);
 
-        List<mt.edu.um.cs.rv.monitors.results.MonitorResult> results = new ArrayList<>();
+        MonitorResultList monitorResultList = new MonitorResultList();
 
         for (Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c : interestedMonitorTypes){
 
@@ -109,12 +110,12 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
             }
 
             MonitorResult monitorResult = monitor.handleEvent(e, state);
-            results.add(monitorResult);
+            monitorResultList.addMonitorResult(monitorResult);
 
             this.persistState(c, e, state);
         }
 
-        return mt.edu.um.cs.rv.monitors.results.MonitorResultList.of(results);
+        return monitorResultList;
     }
 
     @Override

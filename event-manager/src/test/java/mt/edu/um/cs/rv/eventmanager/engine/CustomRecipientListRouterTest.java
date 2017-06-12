@@ -17,7 +17,7 @@ public class CustomRecipientListRouterTest {
 
     @Before
     public void setup() {
-        router = new CustomRecipientListRouter();
+        router = new CustomRecipientListRouter(null);
     }
 
     @Test
