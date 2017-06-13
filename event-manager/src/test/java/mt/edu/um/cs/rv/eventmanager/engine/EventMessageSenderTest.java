@@ -1,15 +1,18 @@
 package mt.edu.um.cs.rv.eventmanager.engine;
 
 import mt.edu.um.cs.rv.eventmanager.common.TestEvent;
+import mt.edu.um.cs.rv.eventmanager.engine.config.EventManagerConfigration;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.NullChannel;
-import org.springframework.integration.core.MessagingTemplate;
+import org.springframework.integration.core.AsyncMessagingTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -21,38 +24,35 @@ public class EventMessageSenderTest {
 
     private EventMessageSender eventMessageSender;
 
-    private MessagingTemplate messagingTemplate;
-    private ExecutorChannel executorChannel;
-    private NullChannel noop;
-
+    private AsyncMessagingTemplate asyncMessagingTemplate;
 
     @Before
     public void setup() {
 
-        messagingTemplate = mock(MessagingTemplate.class);
-        executorChannel = mock(ExecutorChannel.class);
-        noop = mock(NullChannel.class);
+        asyncMessagingTemplate = mock(AsyncMessagingTemplate.class);
 
-        eventMessageSender = new EventMessageSender(messagingTemplate, executorChannel, noop);
+        eventMessageSender = new EventMessageSender(asyncMessagingTemplate);
     }
 
     @Test
     public void testSendSyncEvent() {
 
-        when(messagingTemplate.sendAndReceive(eq(executorChannel), any(Message.class))).thenReturn(new GenericMessage(MonitorResult.ok()));
+        when(asyncMessagingTemplate.asyncSendAndReceive(eq(EventManagerConfigration.EVENT_MANAGER_REQUEST_CHANNEL), any(Message.class))).thenReturn(CompletableFuture.completedFuture(new GenericMessage(MonitorResult.ok())));
 
         Event e = new TestEvent(true);
         eventMessageSender.send(e);
 
-        verify(messagingTemplate, times(1)).sendAndReceive(eq(executorChannel), any(Message.class));
+        verify(asyncMessagingTemplate, times(1)).asyncSendAndReceive(eq(EventManagerConfigration.EVENT_MANAGER_REQUEST_CHANNEL), any(Message.class));
     }
 
     @Test
     public void testSendAsyncEvent() {
 
+        when(asyncMessagingTemplate.asyncSendAndReceive(eq(EventManagerConfigration.EVENT_MANAGER_REQUEST_CHANNEL), any(Message.class))).thenReturn(CompletableFuture.completedFuture(new GenericMessage(MonitorResult.ok())));
+
         Event e = new TestEvent(false);
         eventMessageSender.send(e);
 
-        verify(messagingTemplate, times(1)).send(eq(executorChannel), any(Message.class));
+        verify(asyncMessagingTemplate, times(1)).asyncSendAndReceive(eq(EventManagerConfigration.EVENT_MANAGER_REQUEST_CHANNEL), any(Message.class));
     }
 }

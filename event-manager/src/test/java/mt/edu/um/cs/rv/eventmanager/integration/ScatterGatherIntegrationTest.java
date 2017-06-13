@@ -10,6 +10,7 @@ import mt.edu.um.cs.rv.eventmanager.integration.monitors.RememberingMonitor;
 import mt.edu.um.cs.rv.eventmanager.monitors.registry.MonitorRegistry;
 import mt.edu.um.cs.rv.eventmanager.observers.DirectInvocationEventObserver;
 import mt.edu.um.cs.rv.events.Event;
+import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +21,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -145,13 +148,15 @@ public class ScatterGatherIntegrationTest {
 
         //send A events - this should activate all monitors
         EventA eventA = new EventA(false, 1);
-        directInvocationEventObserver.observeEvent(eventA);
+        Future<MonitorResult<?>> monitorResultFuture = directInvocationEventObserver.observeEvent(eventA);
 
         //wait a bit to ensure the events have been processed by R1 and R2
         Thread.sleep(100);
         //assert that events have been processed by R1 and R2
         Assert.assertEquals(1, rememberingMonitor1.getAllEvents().size());
         Assert.assertEquals(1, rememberingMonitor2.getAllEvents().size());
+
+        Assert.assertFalse(monitorResultFuture.isDone());
 
         //release semaphore
         semaphore.release();
@@ -163,7 +168,7 @@ public class ScatterGatherIntegrationTest {
 
     @Test
     @DirtiesContext //ensure full context is reloaded
-    public void testEnsureMonitorsReceiveEventsInTheRightOrder() throws InterruptedException {
+    public void testEnsureMonitorsReceiveEventsInTheRightOrder() throws InterruptedException, ExecutionException {
         int numberOfEventsForEachType = 10;
 
         int numberOfTotalEventsToBeProcessed =
@@ -194,19 +199,22 @@ public class ScatterGatherIntegrationTest {
             EventA eventA = new EventA(false, i);
             expectedForMonitorRR1.add(eventA);
             expectedForMonitorRR3.add(eventA);
-            directInvocationEventObserver.observeEvent(eventA);
+            Future<MonitorResult<?>> monitorResultFuture = directInvocationEventObserver.observeEvent(eventA);
+            monitorResultFuture.get();
 
             //send B event
             EventB eventB = new EventB(false, i);
             expectedForMonitorRR1.add(eventB);
             expectedForMonitorRR2.add(eventB);
-            directInvocationEventObserver.observeEvent(eventB);
+            monitorResultFuture = directInvocationEventObserver.observeEvent(eventB);
+            monitorResultFuture.get();
 
             //send C event
             EventC eventC = new EventC(false, i);
             expectedForMonitorRR2.add(eventC);
             expectedForMonitorRR3.add(eventC);
-            directInvocationEventObserver.observeEvent(eventC);
+            monitorResultFuture = directInvocationEventObserver.observeEvent(eventC);
+            monitorResultFuture.get();
         }
 
         //wait for all processing to finish

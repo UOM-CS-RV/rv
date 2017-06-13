@@ -1,6 +1,5 @@
 package mt.edu.um.cs.rv.eventmanager.engine.config;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import mt.edu.um.cs.rv.eventmanager.adaptors.EventAdaptorConfiguration;
 import mt.edu.um.cs.rv.eventmanager.engine.AfterAllMessagesInGroupReleaseStrategy;
 import mt.edu.um.cs.rv.eventmanager.engine.CustomRecipientListRouter;
@@ -16,11 +15,9 @@ import org.springframework.integration.aggregator.AggregatingMessageHandler;
 import org.springframework.integration.aggregator.DefaultAggregatingMessageGroupProcessor;
 import org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.channel.ExecutorChannel;
-import org.springframework.integration.channel.NullChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.integration.core.MessagingTemplate;
+import org.springframework.integration.core.AsyncMessagingTemplate;
 import org.springframework.integration.endpoint.PollingConsumer;
 import org.springframework.integration.handler.ServiceActivatingHandler;
 import org.springframework.integration.scattergather.ScatterGatherHandler;
@@ -29,7 +26,8 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by dwardu on 18/01/2016.
@@ -40,32 +38,20 @@ import java.util.concurrent.*;
 public class EventManagerConfigration {
 
 
+    public static final String EVENT_MANAGER_REQUEST_CHANNEL = "eventManagerRequestChannel";
+    public static final String EVENT_MANAGER_RESPONSE_CHANNEL = "eventManagerResponseChannel";
+
     //////////////////////// SCATTERER ////////////////////////
 
     //set up scatter gather distribution - this will be responsible for running the show
     @Bean
-    @ServiceActivator(inputChannel = "eventMessageRequestChannel")
+    @ServiceActivator(inputChannel = EVENT_MANAGER_REQUEST_CHANNEL)
     public MessageHandler scatterGatherDistribution() {
         ScatterGatherHandler handler = new ScatterGatherHandler(distributor(), gatherer());
 
         //output channel is not set, as output channel will be defined by the incoming message to be used as a sync block
         //handler.setOutputChannel(noop());
         return handler;
-    }
-
-    @Bean
-    public NullChannel noop() {
-        return new NullChannel();
-    }
-
-    @Bean
-    ExecutorChannel eventMessageRequestChannel() {
-        ThreadFactory channelThread = new ThreadFactoryBuilder()
-                .setNameFormat("EventMessageRequestChannel")
-                .setDaemon(true)
-                .build();
-        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor(channelThread);
-        return new ExecutorChannel(singleThreadExecutor);
     }
 
     @Bean
@@ -80,13 +66,13 @@ public class EventManagerConfigration {
     }
 
     @Bean
-    public MessagingTemplate inputMessagingTemplate() {
-        return new MessagingTemplate();
+    public AsyncMessagingTemplate inputMessagingTemplate() {
+        return new AsyncMessagingTemplate();
     }
 
     @Bean
     public EventMessageSender eventMessageSender() {
-        return new EventMessageSender(inputMessagingTemplate(), eventMessageRequestChannel(), noop());
+        return new EventMessageSender(inputMessagingTemplate());
     }
 
 

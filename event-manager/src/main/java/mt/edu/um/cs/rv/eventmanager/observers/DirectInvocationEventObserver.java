@@ -3,9 +3,14 @@ package mt.edu.um.cs.rv.eventmanager.observers;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by dwardu on 19/01/2016.
@@ -13,6 +18,7 @@ import org.springframework.context.ApplicationContextAware;
 public class DirectInvocationEventObserver implements EventObserver, ApplicationContextAware
 {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(DirectInvocationEventObserver.class);
     EventMessageSender eventMessageSender;
 
     private static DirectInvocationEventObserver directInvocationEventObserver;
@@ -22,7 +28,7 @@ public class DirectInvocationEventObserver implements EventObserver, Application
     }
 
     @Override
-    public MonitorResult observeEvent(Event e) {
+    public Future<MonitorResult<?>> observeEvent(Event e) {
         return eventMessageSender.send(e);
     }
 
