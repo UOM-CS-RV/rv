@@ -131,19 +131,4 @@ public class MonitorResult<P extends Serializable> implements Serializable {
                 "\"throwableStackTrace\": [" + getThrowableStackTraceAsString() + "]" +
                 '}';
     }
-
-    public static void foo() {
-        MonitorResult<?> ok = MonitorResult.ok();
-        System.out.println(ok);
-
-        MonitorResult error = MonitorResult.error(null, new Throwable());
-        System.out.println(error);
-
-        error = MonitorResult.error(null, new RuntimeException());
-        System.out.println(error);
-    }
-
-    public static void main(String[] args) {
-        foo();
-    }
 }

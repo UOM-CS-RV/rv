@@ -1,14 +1,8 @@
 package mt.edu.um.cs.rv.monitors.results;
 
-import mt.edu.um.cs.rv.monitors.Monitor;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static mt.edu.um.cs.rv.monitors.results.MonitorResultStatus.ERROR;
 import static mt.edu.um.cs.rv.monitors.results.MonitorResultStatus.OK;
 
 /**
@@ -48,7 +42,7 @@ public class MonitorResultList extends MonitorResult<ArrayList<MonitorResult<?>>
     }
 
     @Override
-    protected String getPayloadAsString(){
+    protected String getPayloadAsString() {
         if (this.getPayload().isPresent()) {
             return this.getPayload().get()
                     .stream()
