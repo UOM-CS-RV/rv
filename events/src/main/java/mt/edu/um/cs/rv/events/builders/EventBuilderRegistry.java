@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by edwardmallia on 19/01/2017.
@@ -24,7 +24,7 @@ public class EventBuilderRegistry
     @Autowired(required = false)
     private List<EventBuilder> eventBuilders;
 
-    private Map<Class<? extends TriggerData>, EventBuilder> buildersMap;
+    private MultiValueMap<Class<? extends TriggerData>, EventBuilder> buildersMap;
 
     @PostConstruct
     public void init(){
@@ -33,14 +33,14 @@ public class EventBuilderRegistry
             eventBuilders = new ArrayList<>();
         }
 
-        buildersMap = eventBuilders
+        buildersMap = new LinkedMultiValueMap<>();
+
+        eventBuilders
                 .stream()
-                .collect(
-                        Collectors.toMap(b -> b.forTrigger(), b -> b)
-                        );
+                .forEach(b -> buildersMap.add(b.forTrigger(), b));
     }
 
-    public EventBuilder getBuilder(Class<? extends TriggerData> t){
+    public List<EventBuilder> getBuilders(Class<? extends TriggerData> t){
         return buildersMap.get(t);
     }
 }

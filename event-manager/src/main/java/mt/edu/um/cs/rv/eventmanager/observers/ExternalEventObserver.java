@@ -6,11 +6,14 @@ import mt.edu.um.cs.rv.events.builders.EventBuilder;
 import mt.edu.um.cs.rv.events.builders.EventBuilderRegistry;
 import mt.edu.um.cs.rv.events.triggers.TriggerData;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
+import mt.edu.um.cs.rv.monitors.results.MonitorResultList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessagingException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -37,29 +40,50 @@ public abstract class ExternalEventObserver<M, T extends TriggerData, R> {
         LOGGER.debug("Event should be {}", shouldEventBeSynchronous ? "synchronous" : "asynchronous");
 
         LOGGER.debug("Building event ...");
-        EventBuilder builder = eventBuilderRegistry.getBuilder(trigger.getClass());
-        Event event = builder.build(trigger, shouldEventBeSynchronous);
-        LOGGER.debug("Built new event {}", event);
+        List<EventBuilder> eventBuilders = eventBuilderRegistry.getBuilders(trigger.getClass());
 
-        //TODO should this be the default ?
-        Future<MonitorResult<?>> monitorResultFuture = null;
-        LOGGER.debug("Checking whether event should be fired ...");
-        if (builder.shouldFireEvent(event)) {
-            LOGGER.debug("Event should be fired. Firing event ...");
-            monitorResultFuture = fireEvent(event);
-        } else {
-            LOGGER.debug("Event should not be fired.");
-            monitorResultFuture = CompletableFuture.completedFuture(MonitorResult.ok());
+        List<Future<MonitorResult<?>>> monitorResultFutures = new ArrayList();
+        for (EventBuilder eventBuilder: eventBuilders) {
+            Event event = eventBuilder.build(trigger, shouldEventBeSynchronous);
+            LOGGER.debug("Built new event {}", event);
+
+            //TODO should this be the default ?
+            Future<MonitorResult<?>> monitorResultFuture = null;
+            LOGGER.debug("Checking whether event should be fired ...");
+            if (eventBuilder.shouldFireEvent(event)) {
+                LOGGER.debug("Event should be fired. Firing event ...");
+                monitorResultFuture = fireEvent(event);
+            } else {
+                LOGGER.debug("Event should not be fired.");
+                monitorResultFuture = CompletableFuture.completedFuture(MonitorResult.ok());
+            }
+
+            monitorResultFutures.add(monitorResultFuture);
         }
 
         LOGGER.debug("Building chained CompletableFuture that will get the monitor result and generate the response.");
-        return buildCompletableFuture(message, trigger, monitorResultFuture);
+        return buildCompletableFuture(message, trigger, monitorResultFutures);
     }
 
-    private CompletableFuture<R> buildCompletableFuture(final M m, final T t, final Future<MonitorResult<?>> monitorResultFuture) {
+    private CompletableFuture<R> buildCompletableFuture(final M m, final T t, final List<Future<MonitorResult<?>>> monitorResultFutures) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return monitorResultFuture.get();
+                if (monitorResultFutures == null || monitorResultFutures.isEmpty()){
+                    return MonitorResult.ok();
+                }
+                else if (monitorResultFutures.size() == 1) {
+                    return monitorResultFutures.get(0).get();
+                }
+                else {
+                    MonitorResultList monitorResultList = new MonitorResultList();
+
+                    for (Future<MonitorResult<?>> monitorResultFuture : monitorResultFutures) {
+                        MonitorResult<?> monitorResult = monitorResultFuture.get();
+                        monitorResultList.addMonitorResult(monitorResult);
+                    }
+
+                    return monitorResultList;
+                }
             } catch (MessagingException me){
                 String msg = "Unexpected MessageException occurred";
                 LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, me);
