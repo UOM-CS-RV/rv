@@ -11,13 +11,13 @@ import org.springframework.util.MultiValueMap;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by edwardmallia on 19/01/2017.
  */
 @Component
-public class EventBuilderRegistry
-{
+public class EventBuilderRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventBuilderRegistry.class);
 
@@ -27,9 +27,9 @@ public class EventBuilderRegistry
     private MultiValueMap<Class<? extends TriggerData>, EventBuilder> buildersMap;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         //just in case there are no event builders to wire in, create an empty list
-        if (eventBuilders == null){
+        if (eventBuilders == null) {
             eventBuilders = new ArrayList<>();
         }
 
@@ -37,10 +37,28 @@ public class EventBuilderRegistry
 
         eventBuilders
                 .stream()
-                .forEach(b -> buildersMap.add(b.forTrigger(), b));
+                .forEach(b -> buildersMap.add(b.forTriggerData(), b));
     }
 
-    public List<EventBuilder> getBuilders(Class<? extends TriggerData> t){
-        return buildersMap.get(t);
+    public List<EventBuilder> getBuilders(Class<? extends TriggerData> d) {
+        return buildersMap.get(d);
+    }
+
+    public List<EventBuilder> getBuilders(Class<? extends TriggerData> d, Object trigger) {
+        return buildersMap.get(d)
+                .stream()
+                .filter(eventBuilder -> {
+                            if (eventBuilder.forTrigger() == null) {
+                                if (trigger == null) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else {
+                                return d.equals(trigger);
+                            }
+                        }
+                ).collect(Collectors.toList())
+                ;
     }
 }

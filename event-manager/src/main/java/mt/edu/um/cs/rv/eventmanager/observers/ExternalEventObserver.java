@@ -40,7 +40,7 @@ public abstract class ExternalEventObserver<M, T extends TriggerData, R> {
         LOGGER.debug("Event should be {}", shouldEventBeSynchronous ? "synchronous" : "asynchronous");
 
         LOGGER.debug("Building event ...");
-        List<EventBuilder> eventBuilders = eventBuilderRegistry.getBuilders(trigger.getClass());
+        List<EventBuilder> eventBuilders = eventBuilderRegistry.getBuilders(trigger.getClass(), this.getClass());
 
         List<Future<MonitorResult<?>>> monitorResultFutures = new ArrayList();
         for (EventBuilder eventBuilder: eventBuilders) {
