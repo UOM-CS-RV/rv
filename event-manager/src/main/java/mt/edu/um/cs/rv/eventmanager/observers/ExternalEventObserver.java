@@ -4,6 +4,7 @@ import mt.edu.um.cs.rv.eventmanager.engine.EventMessageSender;
 import mt.edu.um.cs.rv.events.Event;
 import mt.edu.um.cs.rv.events.builders.EventBuilder;
 import mt.edu.um.cs.rv.events.builders.EventBuilderRegistry;
+import mt.edu.um.cs.rv.events.triggers.Trigger;
 import mt.edu.um.cs.rv.events.triggers.TriggerData;
 import mt.edu.um.cs.rv.monitors.results.MonitorResult;
 import mt.edu.um.cs.rv.monitors.results.MonitorResultList;
@@ -22,7 +23,7 @@ import java.util.concurrent.Future;
  * <p>
  * Created by edwardmallia on 19/01/2017.
  */
-public abstract class ExternalEventObserver<M, T extends TriggerData, R> {
+public abstract class ExternalEventObserver<M, TD extends TriggerData, R> implements Trigger {
     private static Logger LOGGER = LoggerFactory.getLogger(ExternalEventObserver.class);
 
     @Autowired
@@ -33,18 +34,18 @@ public abstract class ExternalEventObserver<M, T extends TriggerData, R> {
 
     public final CompletableFuture<R> onMessage(M message) {
         LOGGER.debug("Generating Trigger from Message");
-        T trigger = generateTrigger(message);
+        TD triggerData = generateTriggerData(message);
 
         LOGGER.debug("Computing whether event should be a/synchronous");
-        Boolean shouldEventBeSynchronous = shouldEventBeSynchronous(trigger);
+        Boolean shouldEventBeSynchronous = shouldEventBeSynchronous(triggerData);
         LOGGER.debug("Event should be {}", shouldEventBeSynchronous ? "synchronous" : "asynchronous");
 
         LOGGER.debug("Building event ...");
-        List<EventBuilder> eventBuilders = eventBuilderRegistry.getBuilders(trigger.getClass(), this.getClass());
+        List<EventBuilder> eventBuilders = eventBuilderRegistry.getBuilders(triggerData.getClass(), this.getClass());
 
         List<Future<MonitorResult<?>>> monitorResultFutures = new ArrayList();
         for (EventBuilder eventBuilder: eventBuilders) {
-            Event event = eventBuilder.build(trigger, shouldEventBeSynchronous);
+            Event event = eventBuilder.build(triggerData, shouldEventBeSynchronous);
             LOGGER.debug("Built new event {}", event);
 
             //TODO should this be the default ?
@@ -62,10 +63,10 @@ public abstract class ExternalEventObserver<M, T extends TriggerData, R> {
         }
 
         LOGGER.debug("Building chained CompletableFuture that will get the monitor result and generate the response.");
-        return buildCompletableFuture(message, trigger, monitorResultFutures);
+        return buildCompletableFuture(message, triggerData, monitorResultFutures);
     }
 
-    private CompletableFuture<R> buildCompletableFuture(final M m, final T t, final List<Future<MonitorResult<?>>> monitorResultFutures) {
+    private CompletableFuture<R> buildCompletableFuture(final M m, final TD triggerData, final List<Future<MonitorResult<?>>> monitorResultFutures) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 if (monitorResultFutures == null || monitorResultFutures.isEmpty()){
@@ -94,19 +95,19 @@ public abstract class ExternalEventObserver<M, T extends TriggerData, R> {
                 LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, throwable);
                 return MonitorResult.failure(null, throwable);
             }
-        }).thenApply(monitorResult -> generateResponse(m, t, monitorResult));
+        }).thenApply(monitorResult -> generateResponse(m, triggerData, monitorResult));
     }
 
     private Future<MonitorResult<?>> fireEvent(Event event) {
         return eventMessageSender.send(event);
     }
 
-    public abstract T generateTrigger(M m);
+    public abstract TD generateTriggerData(M m);
 
-    public abstract R generateResponse(M m, T t, MonitorResult monitorResult);
+    public abstract R generateResponse(M m, TD triggerData, MonitorResult monitorResult);
 
     //default implementation
-    public Boolean shouldEventBeSynchronous(T t) {
+    public Boolean shouldEventBeSynchronous(TD triggerData) {
         return false;
     }
 }

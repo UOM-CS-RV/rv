@@ -1,12 +1,13 @@
 package mt.edu.um.cs.rv.events.builders;
 
 import mt.edu.um.cs.rv.events.Event;
+import mt.edu.um.cs.rv.events.triggers.Trigger;
 import mt.edu.um.cs.rv.events.triggers.TriggerData;
 
 /**
  * Created by edwardmallia on 19/01/2017.
  */
-public interface EventBuilder<D extends TriggerData, E extends Event, T>
+public interface EventBuilder<D extends TriggerData, E extends Event, T extends Class<? extends Trigger>>
 {
     Class<E> forEvent();
 
