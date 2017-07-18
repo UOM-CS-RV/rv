@@ -35,6 +35,7 @@ public class EventMessageSender {
         Message<Event> eventMessage = MessageBuilder
                 .withPayload(e)
                 .setReplyChannelName(EVENT_MANAGER_RESPONSE_CHANNEL)
+                .setErrorChannelName(EVENT_MANAGER_RESPONSE_CHANNEL)
                 .build();
 
         LOGGER.debug("Sending event system message asynchronously (if event is sync, we will block to wait for response)");
