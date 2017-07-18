@@ -49,13 +49,9 @@ public class EventBuilderRegistry {
                 .stream()
                 .filter(eventBuilder -> {
                             if (eventBuilder.forTrigger() == null) {
-                                if (trigger == null) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
+                                return trigger == null;
                             } else {
-                                return d.equals(trigger);
+                                return trigger.equals(eventBuilder.forTrigger());
                             }
                         }
                 ).collect(Collectors.toList())
