@@ -23,7 +23,7 @@ public abstract class CategorisedStatefulMonitor<S extends State> extends Statef
             LOGGER.error("Unable to load state for monitor {}, as supplied event [{}] is not an instance of CategorisedEvent", c.getName(), e);
         }
 
-        State state = this.getMonitorPersistenceProvider().load(c.getTypeName(), ce.categoriseEvent());
+        State state = this.getMonitorPersistenceProvider().load(c, ce.categoriseEvent());
 
         if (state == null){
             //create new state
@@ -46,6 +46,6 @@ public abstract class CategorisedStatefulMonitor<S extends State> extends Statef
             LOGGER.error("Unable to save state for monitor {}, as supplied event [{}] is not an instance of CategorisedEvent", c.getName(), e);
         }
 
-        this.getMonitorPersistenceProvider().save(c.getTypeName(), ce.categoriseEvent(), s);
+        this.getMonitorPersistenceProvider().save(c, ce.categoriseEvent(), s);
     }
 }

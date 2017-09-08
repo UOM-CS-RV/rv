@@ -1,5 +1,6 @@
 package mt.edu.um.cs.rv.monitors.persistence;
 
+import mt.edu.um.cs.rv.monitors.Monitor;
 import mt.edu.um.cs.rv.monitors.state.State;
 
 import java.util.HashMap;
@@ -26,11 +27,11 @@ public class InMemoryMonitorPersistenceProvider implements MonitorPersistencePro
     }
 
     private static final class Key {
-        private Object monitorType;
+        private String monitorType;
         private Object eventCategory;
 
-        public Key(Object monitorType, Object eventCategory) {
-            this.monitorType = monitorType;
+        public Key(Class<? extends Monitor> monitorClass, Object eventCategory) {
+            this.monitorType = monitorClass.getTypeName();
             this.eventCategory = eventCategory;
         }
 
@@ -41,7 +42,8 @@ public class InMemoryMonitorPersistenceProvider implements MonitorPersistencePro
 
             Key key = (Key) o;
 
-            if (!monitorType.equals(key.monitorType)) return false;
+            if (!monitorType.equals(key.monitorType
+            )) return false;
             return eventCategory != null ? eventCategory.equals(key.eventCategory) : key.eventCategory == null;
         }
 
@@ -54,24 +56,24 @@ public class InMemoryMonitorPersistenceProvider implements MonitorPersistencePro
     }
 
     @Override
-    public State load(Object monitorType) {
-        return load(monitorType, null);
+    public State load(Class<? extends Monitor> monitorClass) {
+        return load(monitorClass, null);
     }
 
     @Override
-    public State load(Object monitorType, Object eventCategory) {
-        Key key = new Key(monitorType, eventCategory);
+    public State load(Class<? extends Monitor> monitorClass, Object eventCategory) {
+        Key key = new Key(monitorClass, eventCategory);
         return stateMap.get(key);
     }
 
     @Override
-    public void save(Object monitorType, State state) {
-        save(monitorType, null, state);
+    public void save(Class<? extends Monitor> monitorClass, State state) {
+        save(monitorClass, null, state);
     }
 
     @Override
-    public void save(Object monitorType, Object eventCategory, State state) {
-        Key key = new Key(monitorType, eventCategory);
+    public void save(Class<? extends Monitor> monitorClass, Object eventCategory, State state) {
+        Key key = new Key(monitorClass, eventCategory);
         stateMap.put(key, state);
     }
 }
