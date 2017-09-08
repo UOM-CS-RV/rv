@@ -17,7 +17,7 @@
     <packaging>pom</packaging>
 
     <name>rv-parent</name>
-    <description>A demo for deployment to the Central Repository via OSSRH</description>
+    <description>Runtime Verification Tool Event Manager</description>
     <url>https://github.com/UOM-CS-RV/rv</url>
 
     <licenses>
