@@ -39,7 +39,7 @@ public class CustomRecipientListRouter extends RecipientListRouter {
     }
 
     public void addRecipient(MessageChannel channel, MonitorEventSelector selector) {
-        LOGGER.debug("Adding new channel for the following events [{}]", selector.getMonitor().requiredEvents());
+        LOGGER.debug("Adding new channel for the following events [{}]", selector.getMonitor() != null ? selector.getMonitor().requiredEvents() : "UNKNOWN");
 
         if (useLookupMap) {
             Set<Class<? extends Event>> classes = selector.getMonitor().requiredEvents();
