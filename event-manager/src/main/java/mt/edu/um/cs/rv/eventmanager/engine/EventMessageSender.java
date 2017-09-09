@@ -30,15 +30,15 @@ public class EventMessageSender {
         this.asyncMessagingTemplate = asyncMessagingTemplate;
     }
 
-    private Future<MonitorResult<?>> sendAsync(Event e){
-        LOGGER.debug("Building event system message from event");
+    private Future<MonitorResult<?>> sendAsync(final Event e){
+        LOGGER.debug("Building event system message from event {}", e.getClass().getName());
         Message<Event> eventMessage = MessageBuilder
                 .withPayload(e)
                 .setReplyChannelName(EVENT_MANAGER_RESPONSE_CHANNEL)
                 .setErrorChannelName(EVENT_MANAGER_RESPONSE_CHANNEL)
                 .build();
 
-        LOGGER.debug("Sending event system message asynchronously (if event is sync, we will block to wait for response)");
+        LOGGER.debug("Sending event {} to event system message asynchronously (if event is sync, we will block to wait for response)", e.getClass().getName());
         final Future<Message<?>> messageFuture = this.asyncMessagingTemplate.asyncSendAndReceive(EVENT_MANAGER_REQUEST_CHANNEL, eventMessage);
 
         Future<MonitorResult<?>> monitorResultFuture = new Future<MonitorResult<?>>() {
@@ -70,20 +70,20 @@ public class EventMessageSender {
             }
 
             private MonitorResult<?> transformResult(Message<?> r) {
-                LOGGER.debug("Preparing response");
+                LOGGER.debug("Preparing response for event {}", e.getClass().getName());
                 Object payload = r.getPayload();
 
                 if (payload == null) {
-                    LOGGER.debug("Received a null MonitorResult, creating and returning a OK MonitorResult");
+                    LOGGER.debug("Received a null MonitorResult for event {} processing, creating and returning a OK MonitorResult", e.getClass().getName());
                     return MonitorResult.ok();
                 }
                 if (payload instanceof MonitorResult) {
-                    LOGGER.debug("Received MonitorResult as response, returning the results");
+                    LOGGER.debug("Received MonitorResult [{}] as response for event {} processing, returning the results", payload, e.getClass().getName());
                     return (MonitorResult) payload;
                 }
                 //i.e. event was consumed by more than one top level monitor
                 else if (payload instanceof Collection) {
-                    LOGGER.debug("Received a collection of MonitorResult as response, returning the results as a MonitorResultList");
+                    LOGGER.debug("Received a collection of MonitorResult [{}] as response for event {} processing, returning the results as a MonitorResultList", payload, e.getClass().getName());
                     Collection payloadColl = (Collection) payload;
                     MonitorResultList monitorResultList = new MonitorResultList();
                     //TODO how to handle elements which are not MonitorResult - should not occur
@@ -93,7 +93,7 @@ public class EventMessageSender {
                 else if (payload instanceof Throwable){
                     Throwable throwable = (Throwable) payload;
                     String msg = String.format("Received an unexpected response type of Throwable - [%s]", payload.getClass());
-                    LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, throwable);
+                    LOGGER.error("{} for event {} processing. Creating and returning a FAILURE MonitorResult.", msg, e.getClass().getName(), throwable);
                     MonitorResult<Serializable> failure = MonitorResult.failure(null, throwable);
                     LOGGER.error("Created FAILURE MonitorResult [{}]", failure);
                     return failure;
@@ -110,7 +110,7 @@ public class EventMessageSender {
                         serializable = (Serializable) payload;
                     }
 
-                    LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, throwable);
+                    LOGGER.error("{} for event {} processing. Creating and returning a FAILURE MonitorResult.", msg, e.getClass().getName(),throwable);
                     MonitorResult<Serializable> failure = MonitorResult.failure(serializable, throwable);
                     LOGGER.error("Created FAILURE MonitorResult [{}]", failure);
                     return failure;
@@ -121,12 +121,12 @@ public class EventMessageSender {
         return monitorResultFuture;
     }
 
-    public Future<MonitorResult<?>> send(Event e) {
+    public Future<MonitorResult<?>> send(final Event e) {
         try {
             Future<MonitorResult<?>> monitorResultFuture = sendAsync(e);
 
             if (e.isSynchronous()){
-                LOGGER.debug("Event is synchronous, blocking to wait for response");
+                LOGGER.debug("Event {} is synchronous, blocking to wait for response", e.getClass().getName());
                 //block to wait for response
                 monitorResultFuture.get();
             }
@@ -135,13 +135,13 @@ public class EventMessageSender {
         }
         catch (MessagingException me){
             String msg = "Unexpected MessageException occurred";
-            LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, me);
+            LOGGER.error("{} for event {} processing. Creating and returning a FAILURE MonitorResult.", msg, e.getClass().getName(), me);
             MonitorResult<?> failureResult = MonitorResult.failure(null, me);
             return CompletableFuture.completedFuture(failureResult);
         }
         catch (Throwable t){
             String msg = "Unexpected Throwable occurred";
-            LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, t);
+            LOGGER.error("{} for event {} processing. Creating and returning a FAILURE MonitorResult.", e.getClass().getName(), msg, t);
             MonitorResult<?> failureResult = MonitorResult.failure(null, t);
             return CompletableFuture.completedFuture(failureResult);
         }

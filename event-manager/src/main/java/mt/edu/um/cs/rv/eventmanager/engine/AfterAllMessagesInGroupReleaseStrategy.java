@@ -23,7 +23,6 @@ public class AfterAllMessagesInGroupReleaseStrategy implements ReleaseStrategy {
 
         Collection<Message<?>> messages = group.getMessages();
 
-
         if ((messages == null) || (!messages.iterator().hasNext())) {
             return true;
         } else {
@@ -31,7 +30,7 @@ public class AfterAllMessagesInGroupReleaseStrategy implements ReleaseStrategy {
             Integer messagesSeen = group.getMessages().size();
 
             if (sequenceSize.equals(messagesSeen)){
-                LOGGER.debug("Releasing group as number of expected messages = number of seen [{}]", group.getSequenceSize());
+                LOGGER.debug("Releasing group [{}] as number of expected messages = number of seen [{}]", group.getGroupId(), group.getSequenceSize());
                 return true;
             } else {
                 return false;

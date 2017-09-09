@@ -4,6 +4,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import mt.edu.um.cs.rv.events.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.router.RecipientListRouter;
 import org.springframework.messaging.Message;
@@ -20,6 +22,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class CustomRecipientListRouter extends RecipientListRouter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomRecipientListRouter.class);
+
     private boolean useLookupMap = false;
 
     private ConcurrentLinkedQueue<Recipient> recipientList = null;
@@ -35,6 +39,7 @@ public class CustomRecipientListRouter extends RecipientListRouter {
     }
 
     public void addRecipient(MessageChannel channel, MonitorEventSelector selector) {
+        LOGGER.debug("Adding new channel for the following events [{}]", selector.getMonitor().requiredEvents());
 
         if (useLookupMap) {
             Set<Class<? extends Event>> classes = selector.getMonitor().requiredEvents();
