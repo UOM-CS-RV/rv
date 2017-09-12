@@ -87,7 +87,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
         for (Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c : interestedMonitorTypes){
 
             //TODO this needs to be improved
-            S state = this.loadOrCreateState(c, e, parentState);
+            S state = this.loadOrCreateState(this.getClass(), e, parentState);
 
             //create new monitor with the given state object
             Monitor monitor = null;
@@ -112,7 +112,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
             MonitorResult monitorResult = monitor.handleEvent(e, state);
             monitorResultList.addMonitorResult(monitorResult);
 
-            this.persistState(c, e, state);
+            this.persistState(this.getClass(), e, state);
         }
 
         return monitorResultList;
