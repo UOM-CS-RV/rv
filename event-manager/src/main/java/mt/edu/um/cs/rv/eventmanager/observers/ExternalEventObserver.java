@@ -50,7 +50,7 @@ public abstract class ExternalEventObserver<M, TD extends TriggerData, R> implem
         List<Future<MonitorResult<?>>> monitorResultFutures = new ArrayList<>();
         for (EventBuilder eventBuilder : eventBuilders) {
             LOGGER.debug("Building new event using EventBuilder [{}] TriggerData class [{}] in ExternalEventObserver type [{}].",
-                    eventBuilders.getClass().getTypeName(), triggerData.getClass().getTypeName(), this.getClass().getTypeName());
+                    eventBuilder.getClass().getTypeName(), triggerData.getClass().getTypeName(), this.getClass().getTypeName());
 
             Event event = eventBuilder.build(triggerData, shouldEventBeSynchronous);
             LOGGER.debug("Built new event {} using EventBuilder [{}] TriggerData class [{}] in ExternalEventObserver type [{}].",
