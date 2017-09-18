@@ -33,29 +33,36 @@ public abstract class ExternalEventObserver<M, TD extends TriggerData, R> implem
     EventMessageSender eventMessageSender;
 
     public final CompletableFuture<R> onMessage(M message) {
-        LOGGER.debug("Generating Trigger from Message");
+        LOGGER.debug("Generating TriggerData from Message [{}]", message);
         TD triggerData = generateTriggerData(message);
+        LOGGER.debug("Generated TriggerData [{}] from Message [{}]", triggerData, message);
 
-        LOGGER.debug("Computing whether event should be a/synchronous");
+        LOGGER.debug("Computing whether event to be created from TriggerData [{}] should be a/synchronous", triggerData);
         Boolean shouldEventBeSynchronous = shouldEventBeSynchronous(triggerData);
         LOGGER.debug("Event should be {}", shouldEventBeSynchronous ? "synchronous" : "asynchronous");
 
-        LOGGER.debug("Building event ...");
+        LOGGER.debug("Building event for TriggerData class [{}] in ExternalEventObserver type [{}]. Evaluating EventBuilders to use ...",
+                triggerData.getClass().getTypeName(), this.getClass().getTypeName());
         List<EventBuilder> eventBuilders = eventBuilderRegistry.getBuilders(triggerData.getClass(), this.getClass());
+        LOGGER.debug("Found [{}] EventBuilders for TriggerData class [{}] in ExternalEventObserver type [{}].",
+                eventBuilders == null ? 0 : eventBuilders, triggerData.getClass().getTypeName(), this.getClass().getTypeName());
 
-        List<Future<MonitorResult<?>>> monitorResultFutures = new ArrayList();
-        for (EventBuilder eventBuilder: eventBuilders) {
+        List<Future<MonitorResult<?>>> monitorResultFutures = new ArrayList<>();
+        for (EventBuilder eventBuilder : eventBuilders) {
+            LOGGER.debug("Building new event using EventBuilder [{}] TriggerData class [{}] in ExternalEventObserver type [{}].",
+                    eventBuilders.getClass().getTypeName(), triggerData.getClass().getTypeName(), this.getClass().getTypeName());
+
             Event event = eventBuilder.build(triggerData, shouldEventBeSynchronous);
-            LOGGER.debug("Built new event {}", event);
-
-            //TODO should this be the default ?
+            LOGGER.debug("Built new event {} using EventBuilder [{}] TriggerData class [{}] in ExternalEventObserver type [{}].",
+                    event, eventBuilders.getClass().getTypeName(), triggerData.getClass().getTypeName(), this.getClass().getTypeName());
+            
             Future<MonitorResult<?>> monitorResultFuture = null;
-            LOGGER.debug("Checking whether event should be fired ...");
+            LOGGER.debug("Checking whether event [{}] should be fired ...", event);
             if (eventBuilder.shouldFireEvent(event)) {
-                LOGGER.debug("Event should be fired. Firing event ...");
+                LOGGER.debug("Event [{}] should be fired. Firing event ...", event);
                 monitorResultFuture = fireEvent(event);
             } else {
-                LOGGER.debug("Event should not be fired.");
+                LOGGER.debug("Event [{}] should not be fired.", event);
                 monitorResultFuture = CompletableFuture.completedFuture(MonitorResult.ok());
             }
 
@@ -69,13 +76,11 @@ public abstract class ExternalEventObserver<M, TD extends TriggerData, R> implem
     private CompletableFuture<R> buildCompletableFuture(final M m, final TD triggerData, final List<Future<MonitorResult<?>>> monitorResultFutures) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (monitorResultFutures == null || monitorResultFutures.isEmpty()){
+                if (monitorResultFutures == null || monitorResultFutures.isEmpty()) {
                     return MonitorResult.ok();
-                }
-                else if (monitorResultFutures.size() == 1) {
+                } else if (monitorResultFutures.size() == 1) {
                     return monitorResultFutures.get(0).get();
-                }
-                else {
+                } else {
                     MonitorResultList monitorResultList = new MonitorResultList();
 
                     for (Future<MonitorResult<?>> monitorResultFuture : monitorResultFutures) {
@@ -85,12 +90,11 @@ public abstract class ExternalEventObserver<M, TD extends TriggerData, R> implem
 
                     return monitorResultList;
                 }
-            } catch (MessagingException me){
+            } catch (MessagingException me) {
                 String msg = "Unexpected MessageException occurred";
                 LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, me);
                 return MonitorResult.failure(null, me);
-            }
-            catch (Throwable throwable){
+            } catch (Throwable throwable) {
                 String msg = "Unexpected Throwable occurred";
                 LOGGER.error("{}. Creating and returning a FAILURE MonitorResult.", msg, throwable);
                 return MonitorResult.failure(null, throwable);
