@@ -6,6 +6,8 @@ import mt.edu.um.cs.rv.monitors.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 /**
  * Created by dwardu on 29/04/2017.
  */
@@ -23,9 +25,12 @@ public abstract class CategorisedStatefulMonitor<S extends State> extends Statef
             LOGGER.error("Unable to load state for monitor {}, as supplied event [{}] is not an instance of CategorisedEvent", c.getName(), e);
         }
 
-        State state = this.getMonitorPersistenceProvider().load(c, ce.categoriseEvent());
+        Optional<State> optionalState = this.getMonitorPersistenceProvider().load(c, ce.categoriseEvent());
 
-        if (state == null){
+        State state;
+        if (optionalState.isPresent()) {
+            state = optionalState.get();
+        } else {
             //create new state
             state = initialiseNewState();
         }

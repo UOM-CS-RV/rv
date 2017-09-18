@@ -5,6 +5,7 @@ import mt.edu.um.cs.rv.monitors.state.State;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by dwardu on 29/04/2017.
@@ -56,14 +57,15 @@ public class InMemoryMonitorPersistenceProvider implements MonitorPersistencePro
     }
 
     @Override
-    public State load(Class<? extends Monitor> monitorClass) {
+    public Optional<State> load(Class<? extends Monitor> monitorClass) {
         return load(monitorClass, null);
     }
 
     @Override
-    public State load(Class<? extends Monitor> monitorClass, Object eventCategory) {
+    public Optional<State> load(Class<? extends Monitor> monitorClass, Object eventCategory) {
         Key key = new Key(monitorClass, eventCategory);
-        return stateMap.get(key);
+
+        return Optional.ofNullable(stateMap.get(key));
     }
 
     @Override

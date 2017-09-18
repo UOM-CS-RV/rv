@@ -13,47 +13,50 @@ import java.util.*;
 /**
  * Created by dwardu on 29/04/2017.
  */
-public abstract class StatefulMonitor<S extends State> implements Monitor{
+public abstract class StatefulMonitor<S extends State> implements Monitor {
     private Set<Class<? extends Event>> requiredEvents = new HashSet<>();
 
     private Map<Class<? extends Event>, List<Class<? extends Monitor>>> interestedMonitorTypesForEvent = new HashMap<>();
 
     private MonitorPersistenceProvider monitorPersistenceProvider = null;
 
-    public StatefulMonitor(){
+    public StatefulMonitor() {
         this.initialiseRequiredEvents();
         this.initialiseInterestedMonitorTypesForEvent();
     }
 
     protected abstract void initialiseRequiredEvents();
 
-    protected void addRequiredEvent(Class<? extends Event> eventClass){
+    protected void addRequiredEvent(Class<? extends Event> eventClass) {
         this.requiredEvents.add(eventClass);
     }
 
-    protected void addInterestedMonitorTypesForEvent(Class<? extends Event> eventClass, List<Class<? extends Monitor>> monitorClasses){
+    protected void addInterestedMonitorTypesForEvent(Class<? extends Event> eventClass, List<Class<? extends Monitor>> monitorClasses) {
         this.interestedMonitorTypesForEvent.put(eventClass, monitorClasses);
     }
 
     protected abstract void initialiseInterestedMonitorTypesForEvent();
 
-    public void setMonitorPersistenceProvider(MonitorPersistenceProvider monitorPersistenceProvider){
+    public void setMonitorPersistenceProvider(MonitorPersistenceProvider monitorPersistenceProvider) {
         this.monitorPersistenceProvider = monitorPersistenceProvider;
     }
 
-    protected MonitorPersistenceProvider getMonitorPersistenceProvider(){
+    protected MonitorPersistenceProvider getMonitorPersistenceProvider() {
         if (this.monitorPersistenceProvider == null) {
-             monitorPersistenceProvider = InMemoryMonitorPersistenceProvider.getInstance();
+            monitorPersistenceProvider = InMemoryMonitorPersistenceProvider.getInstance();
         }
         return monitorPersistenceProvider;
     }
 
     protected abstract S initialiseNewState();
 
-    protected S loadOrCreateState(Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c, Event e, State parentState){
-        State state = getMonitorPersistenceProvider().load(c);
+    protected S loadOrCreateState(Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c, Event e, State parentState) {
+        Optional<State> optionalState = getMonitorPersistenceProvider().load(c);
 
-        if (state == null){
+        State state;
+        if (optionalState.isPresent()) {
+            state = optionalState.get();
+        } else {
             //create new state
             state = initialiseNewState();
         }
@@ -63,7 +66,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
         return (S) state;
     }
 
-    protected void persistState(Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c, Event e, S s){
+    protected void persistState(Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c, Event e, S s) {
         this.getMonitorPersistenceProvider().save(c, s);
     }
 
@@ -74,7 +77,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
     @Override
     public final MonitorResult handleEvent(final Event e, final State parentState) {
 
-        if (e == null){
+        if (e == null) {
             //TODO this should never happen
             //TODO handle this cleanly ??
             throw new RuntimeException("Unable to handle null event");
@@ -84,7 +87,7 @@ public abstract class StatefulMonitor<S extends State> implements Monitor{
 
         MonitorResultList monitorResultList = new MonitorResultList();
 
-        for (Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c : interestedMonitorTypes){
+        for (Class<? extends mt.edu.um.cs.rv.monitors.Monitor> c : interestedMonitorTypes) {
 
             //TODO this needs to be improved
             S state = this.loadOrCreateState(this.getClass(), e, parentState);
